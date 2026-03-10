@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Dashboard - REPM</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config = { darkMode: 'class' }</script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        if (localStorage.getItem("theme") === "dark") document.documentElement.classList.add("dark");
+        else document.documentElement.classList.remove("dark");
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .stat-card { transition: all 0.3s ease; }
+        .stat-card:hover { transform: translateY(-4px); box-shadow: 0 20px 40px rgba(0,0,0,0.15); }
+        .source-card { transition: all 0.3s ease; }
+        .source-card:hover { transform: translateY(-2px); }
+        .progress-bar { transition: width 1s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .fade-in { animation: fadeIn 0.5s ease forwards; }
+        .sidebar-link { transition: all 0.2s ease; }
+    </style>
+</head>
+
+<body class="flex h-screen bg-gray-50 dark:bg-gray-900 dark:text-white overflow-hidden">
+
+<!-- ===== SIDEBAR ===== -->
+<aside class="w-64 h-screen bg-gradient-to-b from-blue-900 via-blue-800 to-blue-700 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 text-white flex flex-col justify-between shadow-2xl flex-shrink-0">
+    <div class="overflow-y-auto">
+        <div class="p-6 border-b border-blue-700/50">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-yellow-400 rounded-xl flex items-center justify-center text-blue-900 font-bold text-lg">⚡</div>
+                <div>
+                    <h1 class="text-xl font-bold">REPM</h1>
+                    <p class="text-blue-200 text-xs dark:text-gray-400">Energy Monitor</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- User info -->
+        <div class="px-4 py-4 border-b border-blue-700/30">
+            <div class="flex items-center gap-3 bg-white/10 rounded-xl p-3">
+                <img id="sidebarAvatar" src="https://ui-avatars.com/api/?name=User&background=3b82f6&color=fff" class="w-10 h-10 rounded-full border-2 border-blue-400">
+                <div>
+                    <p id="sidebarUsername" class="font-semibold text-sm">Loading...</p>
+                    <p class="text-blue-200 text-xs dark:text-gray-400">User Account</p>
+                </div>
+            </div>
+        </div>
+
+        <ul class="space-y-1 px-3 py-4">
+            <li><a href="dashboard.html" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl bg-white/20 font-semibold">🏠 <span>Dashboard</span></a></li>
+            <li><a href="input.html" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/10">➕ <span>Add Data</span></a></li>
+            <li><a href="analytics.html" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/10">📊 <span>Analytics</span></a></li>
+            <li><a href="notifications.html" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/10">🔔 <span>Notifications</span> <span id="notifBadge" class="hidden ml-auto bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">!</span></a></li>
+            <li><a href="settings.html" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/10">⚙️ <span>Settings</span></a></li>
+        </ul>
+    </div>
+    <div class="p-4">
+        <button onclick="logout()" class="w-full bg-red-500/80 hover:bg-red-500 py-3 rounded-xl text-center font-semibold transition-all">🚪 Logout</button>
+    </div>
+</aside>
+
+<!-- ===== MAIN CONTENT ===== -->
+<div class="flex-1 flex flex-col overflow-hidden">
+
+<!-- TOP BAR -->
+<header class="bg-white dark:bg-gray-800 border-b dark:border-gray-700 px-8 py-4 flex items-center justify-between shadow-sm flex-shrink-0">
+<div>
+<h2 class="text-2xl font-bold text-gray-800 dark:text-white">
+Welcome back, <span id="headerUsername" class="text-blue-600">User</span> 👋
+</h2>
+<p class="text-sm text-gray-500 dark:text-gray-400" id="todayDate"></p>
+</div>
+
+<div class="flex items-center gap-4">
+
+<a href="input.html"
+class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl font-semibold text-sm flex items-center gap-2">
+➕ Add Data
+</a>
+
+<div class="relative">
+<img id="profileImg"
+onclick="toggleDropdown()"
+src="https://ui-avatars.com/api/?name=User&background=3b82f6&color=fff"
+class="w-10 h-10 rounded-xl cursor-pointer border-2 border-blue-500">
+
+<div id="dropdownMenu"
+class="hidden absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-xl shadow-xl border dark:border-gray-700">
+
+<a href="settings.html"
+class="flex items-center gap-2 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-t-xl text-sm">
+👤 Profile & Settings
+</a>
+
+<button onclick="logout()"
+class="w-full flex items-center gap-2 px-4 py-3 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-b-xl text-sm text-red-600">
+🚪 Logout
+</button>
+
+</div>
+</div>
+</div>
+</header>
+
+<!-- BODY -->
+<div class="flex-1 overflow-y-auto p-8 space-y-6">
+
+<!-- ===== SUMMARY CARDS ===== -->
+<div class="grid grid-cols-2 lg:grid-cols-5 gap-4">
+
+<div class="bg-green-500 text-white p-5 rounded-2xl">
+<p class="text-xs">⚡ Total Produced</p>
+<p class="text-3xl font-bold mt-2" id="totalProduced">0</p>
+<p class="text-xs">kWh today</p>
+</div>
+
+<div class="bg-red-500 text-white p-5 rounded-2xl">
+<p class="text-xs">🌫 CO₂ Emitted</p>
+<p class="text-3xl font-bold mt-2" id="co2Emitted">0</p>
+<p class="text-xs">kg today</p>
+</div>
+
+<div class="bg-teal-500 text-white p-5 rounded-2xl">
+<p class="text-xs">🌿 CO₂ Saved</p>
+<p class="text-3xl font-bold mt-2" id="co2Saved">0</p>
+<p class="text-xs">kg today</p>
+</div>
+
+<div class="bg-blue-500 text-white p-5 rounded-2xl">
+<p class="text-xs">🔌 Total Consumed</p>
+<p class="text-3xl font-bold mt-2" id="totalConsumed">0</p>
+<p class="text-xs">kWh today</p>
+</div>
+
+<div class="bg-yellow-500 text-white p-5 rounded-2xl">
+<p class="text-xs">💰 Total Bill</p>
+<p class="text-3xl font-bold mt-2">₹<span id="totalBill">0</span></p>
+</div>
+
+</div>
+
+<!-- ===== SOURCE CARDS ===== -->
+
+<div class="space-y-4">
+
+<h3 class="text-lg font-bold text-gray-800 dark:text-white">
+📡 Today by Source
+</h3>
+
+<div id="sourceCards" class="space-y-3">
+<div class="bg-white dark:bg-gray-800 rounded-xl p-4 text-center text-gray-400">
+Loading...
+</div>
+</div>
+
+</div>
+
+</div>
+</div>
+
+<script>
+
+const API = '';
+
+function toggleDropdown() {
+document.getElementById("dropdownMenu").classList.toggle("hidden");
+}
+
+window.onclick = function(e) {
+if (!e.target.closest('.relative'))
+document.getElementById("dropdownMenu")?.classList.add("hidden");
+};
+
+async function logout() {
+await fetch(`${API}/logout`, { method: 'POST', credentials: 'include' });
+window.location.href = '../login.html';
+}
+
+function setTodayDate() {
+const now = new Date();
+document.getElementById('todayDate').textContent =
+now.toLocaleDateString('en-IN', {
+weekday:'long',
+year:'numeric',
+month:'long',
+day:'numeric'
+});
+}
+
+const sourceEmoji = {
+Solar:'☀️',
+Wind:'💨',
+Hydro:'💧'
+};
+
+function renderSourceCards(todayList){
+
+const container = document.getElementById('sourceCards');
+
+if(!todayList || todayList.length === 0){
+container.innerHTML =
+'<div class="bg-white dark:bg-gray-800 rounded-xl p-6 text-center"><p class="text-gray-400">No data for today</p></div>';
+return;
+}
+
+container.innerHTML = todayList.map(d => `
+<div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow">
+
+<div class="flex justify-between items-center mb-2">
+<h4 class="font-bold text-gray-800 dark:text-white">
+${sourceEmoji[d.source]} ${d.source}
+</h4>
+<span class="text-sm text-gray-400">
+Efficiency ${(d.efficiency||0).toFixed(1)}%
+</span>
+</div>
+
+<div class="grid grid-cols-2 gap-2 text-sm">
+
+<div>
+<p class="text-gray-400">Produced</p>
+<p class="font-semibold">${(d.energyProduced||0).toFixed(2)} kWh</p>
+</div>
+
+<div>
+<p class="text-gray-400">Consumed</p>
+<p class="font-semibold">${(d.energyConsumed||0).toFixed(2)} kWh</p>
+</div>
+
+<div>
+<p class="text-gray-400">CO₂ Emitted</p>
+<p class="font-semibold">${(d.co2Produced||0).toFixed(2)} kg</p>
+</div>
+
+<div>
+<p class="text-gray-400">CO₂ Saved</p>
+<p class="font-semibold">${(d.co2Consumed||0).toFixed(2)} kg</p>
+</div>
+
+</div>
+
+</div>
+`).join('');
+
+}
+
+async function loadDashboard(){
+
+try{
+
+const res = await fetch(`${API}/user/dashboard`, { credentials:'include' });
+
+if(res.status === 401){
+window.location.href='../login.html';
+return;
+}
+
+const data = await res.json();
+
+document.getElementById('headerUsername').textContent = data.username || 'User';
+
+document.getElementById('totalProduced').textContent = (data.totalProduced||0).toFixed(2);
+document.getElementById('totalConsumed').textContent = (data.totalConsumed||0).toFixed(2);
+document.getElementById('totalBill').textContent = (data.totalBill||0).toFixed(2);
+
+const co2Emitted = (data.todayDataList||[]).reduce((sum,d)=> sum + (d.co2Produced||0),0);
+const co2Saved = (data.todayDataList||[]).reduce((sum,d)=> sum + (d.co2Consumed||0),0);
+
+document.getElementById('co2Emitted').textContent = co2Emitted.toFixed(2);
+document.getElementById('co2Saved').textContent = co2Saved.toFixed(2);
+
+renderSourceCards(data.todayDataList);
+
+}
+catch(e){
+console.error('Dashboard error',e);
+}
+
+}
+
+setTodayDate();
+loadDashboard();
+
+</script>
+</body>
+</html>

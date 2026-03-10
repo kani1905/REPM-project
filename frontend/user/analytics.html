@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Analytics - REPM</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config = { darkMode: 'class' }</script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        if (localStorage.getItem("theme") === "dark") document.documentElement.classList.add("dark");
+        else document.documentElement.classList.remove("dark");
+    </script>
+    <style>body { font-family: 'Inter', sans-serif; }</style>
+</head>
+
+<body class="flex h-screen bg-gray-50 dark:bg-gray-900 dark:text-white overflow-hidden">
+
+<!-- ===== SIDEBAR ===== -->
+<aside class="w-64 h-screen bg-gradient-to-b from-blue-900 via-blue-800 to-blue-700 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 text-white flex flex-col justify-between shadow-2xl flex-shrink-0">
+    <div>
+        <div class="p-6 border-b border-blue-700/50">
+            <h1 class="text-xl font-bold flex items-center gap-2">⚡ REPM</h1>
+            <p class="text-blue-200 text-xs mt-1">Energy Monitor</p>
+        </div>
+        <ul class="space-y-1 px-3 py-4">
+            <li><a href="dashboard.html" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/10 transition-all">🏠 Dashboard</a></li>
+            <li><a href="input.html" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/10 transition-all">➕ Add Data</a></li>
+            <li><a href="analytics.html" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-white/20 font-semibold">📊 Analytics</a></li>
+            <li><a href="notifications.html" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/10 transition-all">🔔 Notifications</a></li>
+            <li><a href="settings.html" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/10 transition-all">⚙️ Settings</a></li>
+        </ul>
+    </div>
+    <div class="p-4">
+        <button onclick="logout()" class="w-full bg-red-500/80 hover:bg-red-500 py-3 rounded-xl font-semibold transition-all">🚪 Logout</button>
+    </div>
+</aside>
+
+<!-- ===== MAIN ===== -->
+<div class="flex-1 flex flex-col overflow-hidden">
+
+    <header class="bg-white dark:bg-gray-800 border-b dark:border-gray-700 px-8 py-4 shadow-sm flex-shrink-0">
+        <h2 class="text-2xl font-bold text-gray-800 dark:text-white">📊 Energy Analytics</h2>
+        <p class="text-sm text-gray-500 dark:text-gray-400">Deep dive into your energy production and consumption</p>
+    </header>
+
+    <div class="flex-1 overflow-y-auto p-8 space-y-6">
+
+        <!-- FILTER ROW -->
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6">
+            <div class="grid md:grid-cols-4 gap-4 items-end">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">🌱 Energy Source</label>
+                    <select id="sourceSelect" onchange="buildChart()" class="w-full p-3 border-2 border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-800 dark:text-white focus:border-blue-500 outline-none">
+                        <option value="ALL">🌐 All Sources</option>
+                        <option value="Solar">☀️ Solar</option>
+                        <option value="Wind">💨 Wind</option>
+                        <option value="Hydro">💧 Hydro</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">📅 Time Period</label>
+                    <select id="periodSelect" onchange="buildChart()" class="w-full p-3 border-2 border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-800 dark:text-white focus:border-blue-500 outline-none">
+                        <option value="today">📅 Today</option>
+                        <option value="weekly">📆 Weekly</option>
+                        <option value="monthly">🗓️ Monthly</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">📈 Metric</label>
+                    <select id="metricSelect" onchange="buildChart()" class="w-full p-3 border-2 border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-800 dark:text-white focus:border-blue-500 outline-none">
+                        <option value="production">⚡ Production vs Consumption</option>
+                        <option value="efficiency">📈 Efficiency</option>
+                        <option value="bill">💰 Electricity Bill</option>
+                        <option value="co2">🌿 CO₂ Emitted vs Saved</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">🎨 Chart Type</label>
+                    <select id="graphType" onchange="buildChart()" class="w-full p-3 border-2 border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-800 dark:text-white focus:border-blue-500 outline-none">
+                        <option value="bar">📊 Bar Chart</option>
+                        <option value="line">📈 Line Chart</option>
+                        <option value="doughnut">🍩 Donut Chart</option>
+                        <option value="radar">🕸️ Radar Chart</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- MAIN CHART -->
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6">
+            <div class="flex justify-between items-center mb-6">
+                <h3 id="chartTitle" class="text-lg font-bold text-gray-800 dark:text-white">Production vs Consumption</h3>
+                <span id="chartSubtitle" class="text-sm text-gray-500 bg-gray-100 dark:bg-gray-700 px-3 py-1 rounded-lg">Today</span>
+            </div>
+            <canvas id="energyChart" height="100"></canvas>
+        </div>
+
+        <!-- SUMMARY STATS ROW -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-5">
+                <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">⚡ Total Produced</p>
+                <p id="statProduced" class="text-2xl font-bold text-green-600 mt-2">0</p>
+                <p class="text-xs text-gray-400">kWh</p>
+            </div>
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-5">
+                <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">🔌 Total Consumed</p>
+                <p id="statConsumed" class="text-2xl font-bold text-red-500 mt-2">0</p>
+                <p class="text-xs text-gray-400">kWh</p>
+            </div>
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-5">
+                <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">💰 Total Bill</p>
+                <p id="statBill" class="text-2xl font-bold text-yellow-600 mt-2">₹0</p>
+                <p class="text-xs text-gray-400">estimated</p>
+            </div>
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-5">
+                <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">🌿 CO₂ Saved</p>
+                <p id="statCO2" class="text-2xl font-bold text-teal-600 mt-2">0</p>
+                <p class="text-xs text-gray-400">kg</p>
+            </div>
+        </div>
+
+        <!-- DATA TABLE -->
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6">
+            <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-4">📋 Detailed Data</h3>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead>
+                        <tr class="bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
+                            <th class="px-4 py-3 text-left rounded-l-lg">Source</th>
+                            <th class="px-4 py-3 text-right">Produced (kWh)</th>
+                            <th class="px-4 py-3 text-right">Consumed (kWh)</th>
+                            <th class="px-4 py-3 text-right">Efficiency</th>
+                            <th class="px-4 py-3 text-right">Bill (₹)</th>
+                            <th class="px-4 py-3 text-right">CO₂ Emitted</th>
+                            <th class="px-4 py-3 text-right rounded-r-lg">CO₂ Saved</th>
+                        </tr>
+                    </thead>
+                    <tbody id="dataTableBody">
+                        <tr><td colspan="7" class="text-center py-8 text-gray-400">Loading data...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const API = '';
+let analyticsData = null;
+let energyChart = null;
+
+async function logout() {
+    await fetch(`${API}/logout`, { method: 'POST', credentials: 'include' });
+    window.location.href = '../login.html';
+}
+
+function getDataset() {
+    if (!analyticsData) return [];
+    const period = document.getElementById('periodSelect').value;
+    const source = document.getElementById('sourceSelect').value;
+    let data = analyticsData[period] || [];
+    if (source !== 'ALL') data = data.filter(d => d.source === source);
+    return data;
+}
+
+function updateSummaryStats(data) {
+    const totalProduced = data.reduce((s, d) => s + (d.energyProduced||0), 0);
+    const totalConsumed = data.reduce((s, d) => s + (d.energyConsumed||0), 0);
+    const totalBill = data.reduce((s, d) => s + (d.electricityBill||0), 0);
+    const co2Saved = data.reduce((s, d) => s + (d.co2Consumed||0), 0);
+    document.getElementById('statProduced').textContent = totalProduced.toFixed(2);
+    document.getElementById('statConsumed').textContent = totalConsumed.toFixed(2);
+    document.getElementById('statBill').textContent = '₹' + totalBill.toFixed(2);
+    document.getElementById('statCO2').textContent = co2Saved.toFixed(2);
+}
+
+function updateTable(data) {
+    const tbody = document.getElementById('dataTableBody');
+    if (!data || data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center py-8 text-gray-400">No data for selected period</td></tr>';
+        return;
+    }
+    tbody.innerHTML = data.map(d => `
+        <tr class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+            <td class="px-4 py-3 font-semibold">${d.source==='Solar'?'☀️':d.source==='Wind'?'💨':'💧'} ${d.source}</td>
+            <td class="px-4 py-3 text-right text-green-600 font-medium">${(d.energyProduced||0).toFixed(2)}</td>
+            <td class="px-4 py-3 text-right text-red-500 font-medium">${(d.energyConsumed||0).toFixed(2)}</td>
+            <td class="px-4 py-3 text-right font-bold ${(d.efficiency||0)>=80?'text-green-600':(d.efficiency||0)>=50?'text-yellow-600':'text-red-500'}">${(d.efficiency||0).toFixed(1)}%</td>
+            <td class="px-4 py-3 text-right text-yellow-600 font-medium">₹${(d.electricityBill||0).toFixed(2)}</td>
+            <td class="px-4 py-3 text-right text-red-400">${(d.co2Produced||0).toFixed(2)} kg</td>
+            <td class="px-4 py-3 text-right text-teal-600 font-medium">${(d.co2Consumed||0).toFixed(2)} kg</td>
+        </tr>`).join('');
+}
+
+function buildChart() {
+    const data = getDataset();
+    const metric = document.getElementById('metricSelect').value;
+    const type = document.getElementById('graphType').value;
+    const period = document.getElementById('periodSelect').value;
+    const isDark = document.documentElement.classList.contains("dark");
+    const textColor = isDark ? "#e5e7eb" : "#374151";
+    const gridColor = isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)";
+
+    const periodLabels = { today: 'Today', weekly: 'Last 7 Days', monthly: 'This Month' };
+    const metricTitles = { production: 'Production vs Consumption', efficiency: 'Efficiency %', bill: 'Electricity Bill (₹)', co2: 'CO₂ Emitted vs Saved' };
+    document.getElementById('chartTitle').textContent = metricTitles[metric];
+    document.getElementById('chartSubtitle').textContent = periodLabels[period];
+
+    // Labels
+    const labels = period === 'today'
+        ? data.map(d => `${d.source==='Solar'?'☀️':d.source==='Wind'?'💨':'💧'} ${d.source}`)
+        : data.map(d => d.entryDate || d.source);
+
+    // Datasets based on metric
+    let datasets = [];
+    if (metric === 'production') {
+        datasets = [
+            { label: 'Produced (kWh)', data: data.map(d=>d.energyProduced||0), backgroundColor:'rgba(34,197,94,0.8)', borderColor:'#22c55e', borderWidth:2, borderRadius:6 },
+            { label: 'Consumed (kWh)', data: data.map(d=>d.energyConsumed||0), backgroundColor:'rgba(239,68,68,0.8)', borderColor:'#ef4444', borderWidth:2, borderRadius:6 }
+        ];
+    } else if (metric === 'efficiency') {
+        datasets = [{ label: 'Efficiency (%)', data: data.map(d=>d.efficiency||0), backgroundColor:'rgba(59,130,246,0.8)', borderColor:'#3b82f6', borderWidth:2, borderRadius:6, fill:true }];
+    } else if (metric === 'bill') {
+        datasets = [{ label: 'Bill (₹)', data: data.map(d=>d.electricityBill||0), backgroundColor:'rgba(234,179,8,0.8)', borderColor:'#eab308', borderWidth:2, borderRadius:6 }];
+    } else if (metric === 'co2') {
+        datasets = [
+            { label: 'CO₂ Emitted (kg)', data: data.map(d=>d.co2Produced||0), backgroundColor:'rgba(239,68,68,0.8)', borderColor:'#ef4444', borderWidth:2, borderRadius:6 },
+            { label: 'CO₂ Saved (kg)', data: data.map(d=>d.co2Consumed||0), backgroundColor:'rgba(20,184,166,0.8)', borderColor:'#14b8a6', borderWidth:2, borderRadius:6 }
+        ];
+    }
+
+    const ctx = document.getElementById('energyChart').getContext('2d');
+    if (energyChart) energyChart.destroy();
+
+    const needsScale = (type !== 'doughnut' && type !== 'radar');
+    energyChart = new Chart(ctx, {
+        type: type,
+        data: { labels, datasets },
+        options: {
+            responsive: true,
+            plugins: { legend: { labels: { color: textColor, padding: 20 } } },
+            scales: needsScale ? {
+                x: { ticks:{color:textColor}, grid:{color:gridColor} },
+                y: { ticks:{color:textColor}, grid:{color:gridColor}, beginAtZero:true }
+            } : {}
+        }
+    });
+
+    updateSummaryStats(data);
+    updateTable(data);
+}
+
+async function loadAnalytics() {
+    try {
+        const res = await fetch(`${API}/user/analytics`, { credentials: 'include' });
+        if (res.status === 401) { window.location.href = '../login.html'; return; }
+        analyticsData = await res.json();
+        buildChart();
+    } catch(e) { console.error('Error loading analytics:', e); }
+}
+
+loadAnalytics();
+</script>
+</body>
+</html>

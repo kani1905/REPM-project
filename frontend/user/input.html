@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Add Energy Data - REPM</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config = { darkMode: 'class' }</script>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<script>
+if(localStorage.getItem("theme")==="dark")
+document.documentElement.classList.add("dark");
+</script>
+
+<style>
+body{font-family:'Inter',sans-serif;}
+.calc-card{transition:all .3s;}
+.calc-card:hover{transform:translateY(-2px);}
+.input-field:focus{outline:none;box-shadow:0 0 0 3px rgba(59,130,246,.3);}
+</style>
+</head>
+
+<body class="flex min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 dark:text-white">
+
+<!-- SIDEBAR -->
+<aside class="w-64 min-h-screen bg-gradient-to-b from-blue-900 via-blue-800 to-blue-700 text-white flex flex-col justify-between fixed">
+<div>
+<div class="p-6 border-b border-blue-700">
+<h1 class="text-2xl font-bold">⚡ REPM</h1>
+<p class="text-xs text-blue-200">Energy Monitor</p>
+</div>
+
+<ul class="px-3 py-4 space-y-2">
+<li><a href="dashboard.html" class="flex gap-3 px-4 py-3 rounded-xl hover:bg-white/10">🏠 Dashboard</a></li>
+<li><a href="input.html" class="flex gap-3 px-4 py-3 rounded-xl bg-white text-blue-900 font-semibold">➕ Add Data</a></li>
+<li><a href="analytics.html" class="flex gap-3 px-4 py-3 rounded-xl hover:bg-white/10">📊 Analytics</a></li>
+<li><a href="notifications.html" class="flex gap-3 px-4 py-3 rounded-xl hover:bg-white/10">🔔 Notifications</a></li>
+<li><a href="settings.html" class="flex gap-3 px-4 py-3 rounded-xl hover:bg-white/10">⚙️ Settings</a></li>
+</ul>
+</div>
+
+<div class="p-4">
+<button onclick="logout()" class="w-full bg-red-500 hover:bg-red-600 py-3 rounded-xl font-semibold">🚪 Logout</button>
+</div>
+</aside>
+
+<!-- MAIN -->
+<div class="flex-1 ml-64 p-8">
+
+<div class="max-w-2xl mx-auto">
+
+<h2 class="text-3xl font-bold text-blue-900 dark:text-white mb-2">⚡ Add Energy Data</h2>
+<p class="text-gray-500 dark:text-gray-400 mb-6">Submit readings — calculations happen automatically</p>
+
+<div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8">
+
+<form id="inputForm" class="space-y-6">
+
+<!-- SOURCE -->
+<div>
+<label class="block text-sm font-semibold mb-2">Energy Source</label>
+<select id="source" class="input-field w-full p-4 border-2 border-gray-200 rounded-xl" required>
+<option value="">Loading sources...</option>
+</select>
+</div>
+
+<!-- PRODUCED / CONSUMED -->
+<div class="grid grid-cols-2 gap-4">
+
+<div>
+<label class="block text-sm font-semibold mb-2">Energy Produced</label>
+<input type="number" id="energyProduced" step="0.01" min="0"
+oninput="calculate()"
+class="input-field w-full p-4 border-2 border-gray-200 rounded-xl">
+</div>
+
+<div>
+<label class="block text-sm font-semibold mb-2">Energy Consumed</label>
+<input type="number" id="energyConsumed" step="0.01" min="0"
+oninput="calculate()"
+class="input-field w-full p-4 border-2 border-gray-200 rounded-xl">
+</div>
+
+</div>
+
+<!-- NEW INPUTS -->
+<div class="grid grid-cols-2 gap-4">
+
+<div>
+<label class="block text-sm font-semibold mb-2">System Capacity (kW)</label>
+<input type="number" id="systemCapacity" step="0.01" min="0"
+oninput="calculate()"
+class="input-field w-full p-4 border-2 border-gray-200 rounded-xl">
+</div>
+
+<div>
+<label class="block text-sm font-semibold mb-2">Operating Hours</label>
+<input type="number" id="operatingHours" step="0.01" min="0"
+oninput="calculate()"
+class="input-field w-full p-4 border-2 border-gray-200 rounded-xl">
+</div>
+
+</div>
+
+<div class="grid grid-cols-2 gap-4">
+
+<div>
+<label class="block text-sm font-semibold mb-2">Electricity Rate (₹/kWh)</label>
+<input type="number" id="electricityRate" value="6"
+oninput="calculate()"
+class="input-field w-full p-4 border-2 border-gray-200 rounded-xl">
+</div>
+
+<div>
+<label class="block text-sm font-semibold mb-2">Date</label>
+<input type="date" id="date"
+class="input-field w-full p-4 border-2 border-gray-200 rounded-xl">
+</div>
+
+</div>
+
+<!-- RESULTS -->
+<div class="bg-blue-50 dark:bg-gray-700 rounded-xl p-6">
+
+<h3 class="font-bold mb-4">Auto Calculated Results</h3>
+
+<div class="grid grid-cols-2 gap-3">
+
+<div class="calc-card bg-white p-4 rounded-lg">
+<p class="text-xs">Efficiency</p>
+<p id="calcEfficiency" class="text-xl font-bold text-blue-600">0%</p>
+</div>
+
+<div class="calc-card bg-white p-4 rounded-lg">
+<p class="text-xs">Electricity Bill</p>
+<p id="calcBill" class="text-xl font-bold text-yellow-600">₹0</p>
+</div>
+
+<div class="calc-card bg-white p-4 rounded-lg">
+<p class="text-xs">Net Energy</p>
+<p id="calcNetEnergy" class="text-xl font-bold text-purple-600">0</p>
+</div>
+
+<div class="calc-card bg-white p-4 rounded-lg">
+<p class="text-xs">CO₂ Produced</p>
+<p id="calcCO2Produced" class="text-xl font-bold text-red-500">0</p>
+</div>
+
+<div class="calc-card bg-white p-4 rounded-lg">
+<p class="text-xs">CO₂ Saved</p>
+<p id="calcCO2Saved" class="text-xl font-bold text-green-600">0</p>
+</div>
+
+</div>
+</div>
+
+<button type="submit"
+class="w-full bg-blue-600 text-white py-4 rounded-xl font-bold">
+Submit Energy Data
+</button>
+
+<div id="msgBox" class="hidden"></div>
+
+</form>
+
+</div>
+</div>
+</div>
+
+<script>
+
+const API='';
+
+async function logout(){
+await fetch(`${API}/logout`,{method:'POST',credentials:'include'});
+window.location.href='../login.html';
+}
+
+function calculate(){
+
+const produced=parseFloat(document.getElementById('energyProduced').value)||0;
+const consumed=parseFloat(document.getElementById('energyConsumed').value)||0;
+const capacity=parseFloat(document.getElementById('systemCapacity').value)||0;
+const hours=parseFloat(document.getElementById('operatingHours').value)||0;
+const rate=parseFloat(document.getElementById('electricityRate').value)||0;
+
+const efficiency=(capacity>0&&hours>0)?(produced/(capacity*hours))*100:0;
+const bill=consumed*rate;
+const netEnergy=produced-consumed;
+const co2Produced=consumed*0.82;
+const co2Saved=produced*0.82;
+
+document.getElementById('calcEfficiency').textContent=efficiency.toFixed(2)+"%";
+document.getElementById('calcBill').textContent="₹"+bill.toFixed(2);
+document.getElementById('calcNetEnergy').textContent=netEnergy.toFixed(2)+" kWh";
+document.getElementById('calcCO2Produced').textContent=co2Produced.toFixed(2)+" kg";
+document.getElementById('calcCO2Saved').textContent=co2Saved.toFixed(2)+" kg";
+
+}
+
+async function loadSources(){
+
+const res=await fetch(`${API}/user/input`,{credentials:'include'});
+const data=await res.json();
+
+const select=document.getElementById('source');
+
+select.innerHTML='<option value="">--Select Source--</option>';
+
+(data.allowedSources||['Solar','Wind','Hydro']).forEach(src=>{
+const opt=document.createElement('option');
+opt.value=src;
+opt.textContent=src;
+select.appendChild(opt);
+});
+
+}
+
+document.getElementById('inputForm').addEventListener('submit',async function(e){
+
+e.preventDefault();
+
+const payload={
+source:document.getElementById('source').value,
+energyProduced:parseFloat(document.getElementById('energyProduced').value),
+energyConsumed:parseFloat(document.getElementById('energyConsumed').value),
+systemCapacity:parseFloat(document.getElementById('systemCapacity').value),
+operatingHours:parseFloat(document.getElementById('operatingHours').value),
+electricityRate:parseFloat(document.getElementById('electricityRate').value),
+date:document.getElementById('date').value
+};
+
+const res=await fetch(`${API}/user/input`,{
+method:'POST',
+headers:{'Content-Type':'application/json'},
+credentials:'include',
+body:JSON.stringify(payload)
+});
+
+if(res.ok){
+window.location.href='dashboard.html';
+}
+
+});
+
+loadSources();
+
+</script>
+</body>
+</html>

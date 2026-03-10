@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Notifications - REPM</title>
+    <meta charset="UTF-8">
+    <style>
+        body { margin:0; font-family:Arial,sans-serif; background:#e0f7fa; display:flex; }
+        .sidebar { position:fixed; top:0; left:0; width:220px; height:100%; background:#1e3c72; color:white; display:flex; flex-direction:column; padding:20px 0; }
+        .sidebar a { color:white; padding:15px 25px; margin:5px 0; border-radius:6px; text-decoration:none; display:block; font-weight:bold; }
+        .sidebar a:hover, .sidebar a.active { background:rgba(255,255,255,0.2); }
+        .sidebar h2 { text-align:center; margin-bottom:30px; }
+        .main { margin-left:240px; padding:40px; flex:1; }
+        .box { background:white; padding:30px; border-radius:12px; margin-bottom:20px; box-shadow:0 5px 30px rgba(0,0,0,0.2); }
+        input,select { padding:8px 12px; border:1px solid #ccc; border-radius:6px; }
+        button.btn { background:#1e3c72; color:white; border:none; padding:10px 20px; border-radius:6px; cursor:pointer; }
+    </style>
+</head>
+<body>
+<div class="sidebar">
+    <h2>⚡ REPM</h2>
+    <a href="dashboard.html">🏠 Dashboard</a>
+    <a href="analytics.html">📊 Analytics</a>
+    <a href="users.html">👥 Users</a>
+    <a href="leaderboard.html">🏆 Leaderboard</a>
+    <a href="notifications.html" class="active">🔔 Notifications</a>
+    <a href="settings.html">⚙ Settings</a>
+    <a href="#" onclick="logout()" style="margin-top:auto; background:#ef4444;">🚪 Logout</a>
+</div>
+
+<div class="main">
+    <div class="box">
+        <h2>📢 Send Notification to User</h2>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;margin-bottom:20px;">
+            <div>
+                <label>User ID</label><br>
+                <input type="number" id="userId" placeholder="User ID">
+            </div>
+            <div>
+                <label>Source</label><br>
+                <select id="source">
+                    <option value="Solar">Solar</option>
+                    <option value="Wind">Wind</option>
+                    <option value="Hydro">Hydro</option>
+                </select>
+            </div>
+            <div style="flex:1;">
+                <label>Message</label><br>
+                <input type="text" id="message" placeholder="Enter message" style="width:300px;">
+            </div>
+            <button class="btn" onclick="sendNotif()">📤 Send</button>
+        </div>
+        <p style="color:green;" id="statusMsg"></p>
+    </div>
+</div>
+
+<script>
+const API = 'http://localhost:8080';
+
+async function logout() {
+    await fetch(`${API}/logout`, { method: 'POST', credentials: 'include' });
+    window.location.href = '../login.html';
+}
+
+async function sendNotif() {
+    const userId = document.getElementById('userId').value;
+    const message = document.getElementById('message').value;
+    const source = document.getElementById('source').value;
+    if (!userId || !message) { alert('Please fill required fields'); return; }
+    try {
+        const res = await fetch(`${API}/admin/notify`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ userId, message, source })
+        });
+        const data = await res.json();
+        document.getElementById('statusMsg').textContent = data.message || 'Notification sent!';
+        setTimeout(() => document.getElementById('statusMsg').textContent = '', 3000);
+    } catch(e) { alert('Error sending notification'); }
+}
+</script>
+</body>
+</html>

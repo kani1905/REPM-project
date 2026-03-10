@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Dashboard - REPM</title>
+    <meta charset="UTF-8">
+    <style>
+        body { margin:0; font-family:Arial,sans-serif; background:#e0f7fa; display:flex; }
+        .sidebar { position:fixed; top:0; left:0; width:220px; height:100%; background:#1e3c72; color:white; display:flex; flex-direction:column; padding:20px 0; box-shadow:3px 0 15px rgba(0,0,0,0.1); }
+        .sidebar a { color:white; padding:15px 25px; margin:5px 0; border-radius:6px; transition:background 0.3s; text-decoration:none; display:block; font-weight:bold; }
+        .sidebar a:hover, .sidebar a.active { background:rgba(255,255,255,0.2); }
+        .sidebar h2 { text-align:center; margin-bottom:30px; }
+        .main { margin-left:240px; padding:40px; flex:1; }
+        .box { background:white; padding:30px; border-radius:12px; margin-bottom:20px; box-shadow:0 5px 30px rgba(0,0,0,0.2); }
+        .grid3 { display:grid; grid-template-columns:repeat(3,1fr); gap:20px; }
+        .grid4 { display:grid; grid-template-columns:repeat(4,1fr); gap:20px; }
+        .stat { background:white; padding:20px; border-radius:10px; box-shadow:0 3px 15px rgba(0,0,0,0.1); text-align:center; }
+        .stat h4 { color:#555; margin:0; }
+        .stat p { font-size:24px; font-weight:bold; color:#1e3c72; margin:10px 0 0; }
+        button { cursor:pointer; }
+    </style>
+</head>
+<body>
+<div class="sidebar">
+    <h2>⚡ REPM</h2>
+    <a href="dashboard.html" class="active">🏠 Dashboard</a>
+    <a href="analytics.html">📊 Analytics</a>
+    <a href="users.html">👥 Users</a>
+    <a href="leaderboard.html">🏆 Leaderboard</a>
+    <a href="notifications.html">🔔 Notifications</a>
+    <a href="settings.html">⚙ Settings</a>
+    <a href="#" onclick="logout()" style="margin-top:auto; background:#ef4444;">🚪 Logout</a>
+</div>
+
+<div class="main">
+    <h2>Admin Dashboard</h2>
+    <p>Welcome, <b id="adminName">Admin</b>!</p>
+
+    <h3>📊 Overall Statistics</h3>
+    <div class="grid4">
+        <div class="stat"><h4>Avg Efficiency</h4><p id="avgEff">0</p></div>
+        <div class="stat"><h4>Avg CO2 Consumed</h4><p id="avgCO2c">0</p></div>
+        <div class="stat"><h4>Avg CO2 Produced</h4><p id="avgCO2p">0</p></div>
+        <div class="stat"><h4>Total Bill (₹)</h4><p id="totalBill">0</p></div>
+    </div>
+
+    <h3 style="margin-top:30px;">☀ Solar</h3>
+    <div class="grid3">
+        <div class="stat"><h4>Efficiency</h4><p id="solarEff">0</p></div>
+        <div class="stat"><h4>CO2</h4><p id="solarCO2">0</p></div>
+        <div class="stat"><h4>Bill (₹)</h4><p id="solarBill">0</p></div>
+    </div>
+
+    <h3 style="margin-top:30px;">💨 Wind</h3>
+    <div class="grid3">
+        <div class="stat"><h4>Efficiency</h4><p id="windEff">0</p></div>
+        <div class="stat"><h4>CO2</h4><p id="windCO2">0</p></div>
+        <div class="stat"><h4>Bill (₹)</h4><p id="windBill">0</p></div>
+    </div>
+
+    <h3 style="margin-top:30px;">💧 Hydro</h3>
+    <div class="grid3">
+        <div class="stat"><h4>Efficiency</h4><p id="hydroEff">0</p></div>
+        <div class="stat"><h4>CO2</h4><p id="hydroCO2">0</p></div>
+        <div class="stat"><h4>Bill (₹)</h4><p id="hydroBill">0</p></div>
+    </div>
+</div>
+
+<script>
+const API = 'http://localhost:8080';
+
+async function logout() {
+    await fetch(`${API}/logout`, { method: 'POST', credentials: 'include' });
+    window.location.href = '../login.html';
+}
+
+async function loadDashboard() {
+    try {
+        const res = await fetch(`${API}/admin/dashboard`, { credentials: 'include' });
+        if (res.status === 401 || res.status === 403) { window.location.href = '../login.html'; return; }
+        const d = await res.json();
+
+        document.getElementById('adminName').textContent = d.username || 'Admin';
+        document.getElementById('avgEff').textContent = (d.avgEfficiency || 0).toFixed(2) + '%';
+        document.getElementById('avgCO2c').textContent = (d.avgCO2Consumed || 0).toFixed(2);
+        document.getElementById('avgCO2p').textContent = (d.avgCO2Produced || 0).toFixed(2);
+        document.getElementById('totalBill').textContent = '₹' + (d.totalElectricityBill || 0).toFixed(2);
+
+        document.getElementById('solarEff').textContent = (d.solarEff || 0).toFixed(2) + '%';
+        document.getElementById('solarCO2').textContent = (d.solarCO2 || 0).toFixed(2);
+        document.getElementById('solarBill').textContent = '₹' + (d.solarBill || 0).toFixed(2);
+
+        document.getElementById('windEff').textContent = (d.windEff || 0).toFixed(2) + '%';
+        document.getElementById('windCO2').textContent = (d.windCO2 || 0).toFixed(2);
+        document.getElementById('windBill').textContent = '₹' + (d.windBill || 0).toFixed(2);
+
+        document.getElementById('hydroEff').textContent = (d.hydroEff || 0).toFixed(2) + '%';
+        document.getElementById('hydroCO2').textContent = (d.hydroCO2 || 0).toFixed(2);
+        document.getElementById('hydroBill').textContent = '₹' + (d.hydroBill || 0).toFixed(2);
+    } catch(e) { console.error('Error loading dashboard:', e); }
+}
+
+loadDashboard();
+</script>
+</body>
+</html>

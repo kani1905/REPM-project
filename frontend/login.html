@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>REPM Login</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Inter', Arial, sans-serif;
+            background-color: #d6f0f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .card {
+            background: #ffffff;
+            padding: 48px 44px;
+            border-radius: 18px;
+            width: 420px;
+            box-shadow: 0 8px 40px rgba(0,0,0,0.10);
+        }
+        h2 {
+            text-align: center;
+            color: #1e3c72;
+            font-size: 26px;
+            font-weight: 700;
+            margin-bottom: 32px;
+            letter-spacing: 0.5px;
+        }
+        .field {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1.5px solid #d0d7de;
+            border-radius: 8px;
+            font-size: 15px;
+            color: #333;
+            margin-bottom: 14px;
+            font-family: 'Inter', Arial, sans-serif;
+            transition: border-color 0.2s;
+            background: #fff;
+        }
+        .field:focus { outline: none; border-color: #1e3c72; box-shadow: 0 0 0 3px rgba(30,60,114,0.08); }
+        .field::placeholder { color: #a0aab4; }
+        .pass-wrapper { position: relative; margin-bottom: 14px; }
+        .pass-wrapper .field { margin-bottom: 0; padding-right: 44px; width: 100%; }
+        .pass-wrapper .eye {
+            position: absolute; right: 14px; top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer; font-size: 18px; color: #8a9ab5;
+            user-select: none;
+        }
+        .btn {
+            width: 100%;
+            padding: 15px;
+            background: #1e3c72;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: 'Inter', Arial, sans-serif;
+            transition: background 0.2s, transform 0.1s;
+            margin-top: 4px;
+        }
+        .btn:hover { background: #163061; transform: translateY(-1px); }
+        .btn:active { transform: translateY(0); }
+        .links {
+            text-align: center;
+            margin-top: 22px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .links a {
+            color: #1e3c72;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        .links a:hover { color: #2a5298; text-decoration: underline; }
+        .msg {
+            padding: 11px 14px; border-radius: 8px;
+            font-size: 14px; text-align: center;
+            margin-bottom: 14px; display: none; font-weight: 500;
+        }
+        .msg.error { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+        .msg.success { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>REPM Login</h2>
+
+    <div id="msgBox" class="msg"></div>
+
+    <form id="loginForm">
+        <input class="field" type="text" name="username" id="username" placeholder="Username" required autocomplete="username">
+
+        <div class="pass-wrapper">
+            <input class="field" type="password" name="password" id="password" placeholder="Password" required autocomplete="current-password">
+            <span class="eye" onclick="togglePass()">👁</span>
+        </div>
+
+        <button class="btn" type="submit" id="loginBtn">Login</button>
+    </form>
+
+    <div class="links">
+        <a href="forgotpassword.html">Forgot Password?</a>
+        <a href="register.html">Create Account</a>
+    </div>
+</div>
+
+<script>
+function togglePass() {
+    const p = document.getElementById('password');
+    p.type = p.type === 'password' ? 'text' : 'password';
+}
+
+function showMsg(text, type) {
+    const box = document.getElementById('msgBox');
+    box.textContent = text;
+    box.className = 'msg ' + type;
+    box.style.display = 'block';
+}
+
+document.getElementById('loginForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const btn = document.getElementById('loginBtn');
+    btn.textContent = 'Logging in...';
+    btn.disabled = true;
+
+    const formData = new FormData(this);
+    try {
+        const response = await fetch('/login', {
+            method: 'POST',
+            body: new URLSearchParams(formData),
+            credentials: 'include'
+        });
+        const data = await response.json();
+        if (response.ok) {
+            showMsg('Login successful! Redirecting...', 'success');
+            setTimeout(() => {
+                if (data.role === 'ADMIN') {
+                    window.location.href = 'admin/dashboard.html';
+                } else {
+                    window.location.href = 'user/dashboard.html';
+                }
+            }, 800);
+        } else {
+            showMsg(data.error || 'Invalid username or password', 'error');
+            btn.textContent = 'Login';
+            btn.disabled = false;
+        }
+    } catch (error) {
+        showMsg('Cannot connect to server. Make sure backend is running.', 'error');
+        btn.textContent = 'Login';
+        btn.disabled = false;
+    }
+});
+</script>
+
+</body>
+</html>
