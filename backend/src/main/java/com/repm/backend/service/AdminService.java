@@ -208,4 +208,12 @@ public class AdminService {
 
         energyDataRepository.save(data);
     }
+
+    public List<EnergyData> getUserEnergyData(Long userId) {
+        return energyDataRepository.findByUserId(userId);
+    }
+
+    public List<EnergyData> getUserEnergyDataBySource(Long userId, String source) {
+        return energyDataRepository.findByUserIdAndSource(userId, source);
+    }
 }

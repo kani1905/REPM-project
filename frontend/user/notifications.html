@@ -1,129 +1,222 @@
 <!DOCTYPE html>
 <html>
-
 <head>
-    <title>Notifications - REPM</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>tailwind.config = { darkMode: 'class' }</script>
-    <script>
-        if (localStorage.getItem("theme") === "dark") {
-            document.documentElement.classList.add("dark");
-        } else {
-            document.documentElement.classList.remove("dark");
-        }
-    </script>
+    <title>Messages - REPM</title>
     <meta charset="UTF-8">
+    <style>
+        :root {
+            --primary: #1e3c72;
+            --secondary: #2a5298;
+            --bg: #f6f8fc;
+            --sidebar-bg: #fff;
+            --text: #444;
+            --accent: #d93025;
+        }
+        body { margin:0; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:var(--bg); display:flex; height: 100vh; overflow: hidden; }
+        
+        .sidebar { width: 250px; background: var(--sidebar-bg); border-right: 1px solid #ddd; display: flex; flex-direction: column; padding: 20px 0; }
+        .sidebar-item { padding: 12px 25px; margin: 4px 10px; border-radius: 20px; cursor: pointer; color: var(--text); font-weight: 500; display: flex; align-items: center; gap: 15px; transition: 0.2s; }
+        .sidebar-item:hover { background: #f1f3f4; }
+        .sidebar-item.active { background: #e8f0fe; color: #1a73e8; }
+        
+        .main { flex: 1; display: flex; flex-direction: column; }
+        .header { height: 64px; background: #fff; border-bottom: 1px solid #ddd; display: flex; align-items: center; padding: 0 20px; gap: 20px; }
+        .search-bar { flex: 1; max-width: 720px; background: #f1f3f4; border-radius: 8px; padding: 10px 20px; border: none; font-size: 16px; }
+        
+        .content { flex: 1; overflow-y: auto; }
+        .msg-list { width: 100%; border-collapse: collapse; }
+        .msg-row { border-bottom: 1px solid #eee; cursor: pointer; transition: 0.1s; background: #fff; }
+        .msg-row:hover { box-shadow: inset 1px 0 0 #dadce0, inset -1px 0 0 #dadce0, 0 1px 2px 0 rgba(60,64,67,.3), 0 1px 3px 1px rgba(60,64,67,.15); z-index: 1; }
+        .msg-row.unread { background: #fff; font-weight: bold; }
+        .msg-row td { padding: 12px 15px; color: #202124; font-size: 14px; }
+        .msg-sender { width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .msg-subject { flex: 1; }
+        .msg-time { width: 100px; text-align: right; color: #5f6368; font-size: 12px; }
+
+        .detail-view { padding: 30px; background: #fff; min-height: 100%; display: none; }
+        .detail-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px; }
+        .detail-body { line-height: 1.6; color: #3c4043; font-size: 15px; white-space: pre-wrap; }
+        .reply-box { margin-top: 40px; border: 1px solid #ddd; border-radius: 8px; padding: 20px; }
+        .reply-box textarea { width: 100%; border: none; outline: none; resize: vertical; min-height: 100px; font-family: inherit; font-size: 14px; }
+
+        .btn { padding: 10px 24px; border-radius: 4px; border: none; cursor: pointer; font-weight: 500; }
+        .btn-primary { background: #1a73e8; color: #fff; }
+        
+        .back-btn { cursor: pointer; color: #5f6368; padding: 8px; border-radius: 50%; }
+        .back-btn:hover { background: #f1f3f4; }
+    </style>
 </head>
+<body>
 
-<body class="flex h-screen bg-gray-50 dark:bg-gray-900 dark:text-white overflow-hidden text-sm">
+<div class="sidebar">
+    <div style="padding: 10px 25px; font-size: 22px; font-weight: bold; color: var(--primary);">⚡ REPM Mail</div>
+    <div style="margin-bottom: 20px;"></div>
+    <div class="sidebar-item active" onclick="loadTab('INBOX', this)">📥 Inbox</div>
+    <div class="sidebar-item" onclick="loadTab('SENT', this)">📤 Sent Messages</div>
+    <div class="sidebar-item" onclick="loadTab('ALERTS', this)">⚡ System Alerts</div>
+    
+    <div style="margin-top: auto; padding: 20px;">
+        <div class="sidebar-item" onclick="window.location.href='dashboard.html'">🏠 Back to Dashboard</div>
+        <div class="sidebar-item" onclick="logout()" style="color: #d93025;">🚪 Logout</div>
+    </div>
+</div>
 
-    <!-- ===== SIDEBAR ===== -->
-    <aside class="w-64 h-screen bg-gradient-to-b from-blue-900 via-blue-800 to-blue-700 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 text-white flex flex-col justify-between shadow-2xl flex-shrink-0 z-50">
-        <div class="overflow-y-auto">
-            <div class="p-6 border-b border-blue-700/50">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-yellow-400 rounded-xl flex items-center justify-center text-blue-900 font-bold text-lg shadow-lg shadow-yellow-500/20">⚡</div>
-                    <div>
-                        <h1 class="text-xl font-bold tracking-tight">REPM</h1>
-                        <p class="text-blue-200 text-[10px] uppercase tracking-widest font-bold opacity-70">Energy Monitor</p>
-                    </div>
-                </div>
-            </div>
-
-            <ul class="space-y-1 px-3 py-4">
-                <li><a href="dashboard.html" class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl transition-all opacity-80 hover:opacity-100 hover:bg-white/10">🏠 <span>Dashboard</span></a></li>
-                <li><a href="input.html" class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl transition-all opacity-80 hover:opacity-100 hover:bg-white/10">➕ <span>Add Data</span></a></li>
-                <li><a href="analytics.html" class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl transition-all opacity-80 hover:opacity-100 hover:bg-white/10">📊 <span>Analytics</span></a></li>
-                <li><a href="notifications.html" class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl bg-white/20 font-bold shadow-inner relative text-white">🔔 <span>Notifications</span> <span id="notifBadge" class="hidden ml-auto bg-red-500 text-white text-[10px] rounded-full w-5 h-5 flex items-center justify-center border-2 border-blue-800">!</span></a></li>
-                <li><a href="settings.html" class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl transition-all opacity-80 hover:opacity-100 hover:bg-white/10">⚙️ <span>Settings</span></a></li>
-            </ul>
-        </div>
-        <div class="p-4 border-t border-blue-700/30">
-            <button onclick="logout()" class="w-full bg-red-500/80 hover:bg-red-500 py-3 rounded-xl text-center font-bold transition-all shadow-lg shadow-red-900/20">🚪 Logout</button>
-        </div>
-    </aside>
-
-    <!-- MAIN -->
-    <div class="flex-1 flex flex-col overflow-y-auto p-8 text-sm">
-        <h1 class="text-3xl font-bold mb-8">🔔 Notifications</h1>
-
-        <div class="flex gap-4 mb-6">
-            <button onclick="showTab('auto')"
-                class="bg-red-600 hover:bg-red-700 text-white px-5 py-2 rounded-lg shadow transition">⚡ Auto
-                Alerts</button>
-            <button onclick="showTab('admin')"
-                class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg shadow transition">👨‍💼 Admin
-                Messages</button>
-        </div>
-
-        <div id="auto" class="tab bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg">
-            <h2 class="text-xl font-bold text-red-600 mb-5">⚡ System Generated Alerts</h2>
-            <div id="autoList">
-                <p class="text-gray-500">Loading...</p>
-            </div>
-        </div>
-
-        <div id="admin" class="tab hidden bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg mt-4">
-            <h2 class="text-xl font-bold text-blue-700 mb-5">👨‍💼 Messages from Admin</h2>
-            <div id="adminList">
-                <p class="text-gray-500">Loading...</p>
-            </div>
+<div class="main">
+    <div class="header">
+        <input type="text" class="search-bar" placeholder="Search messages...">
+        <div style="margin-left: auto; display: flex; align-items: center; gap: 15px;">
+            <span id="userName">User</span>
+            <div style="width: 32px; height: 32px; background: #1e3c72; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold;">U</div>
         </div>
     </div>
 
-    <script>
-        const API = 'https://repm-project-production.up.railway.app';
+    <div class="content" id="listView">
+        <table class="msg-list">
+            <tbody id="msgTableBody">
+                <!-- Messages -->
+            </tbody>
+        </table>
+    </div>
 
-        function showTab(tab) {
-            document.querySelectorAll('.tab').forEach(t => t.classList.add('hidden'));
-            document.getElementById(tab).classList.remove('hidden');
-        }
+    <div class="content detail-view" id="detailView">
+        <div class="back-btn" onclick="showList()" style="display:inline-block; margin-bottom: 20px;">⬅ Back</div>
+        <div class="detail-header">
+            <div>
+                <h2 id="viewSubject">Message Subject</h2>
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <div style="width: 40px; height: 40px; background: #eee; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold;" id="senderInitial">A</div>
+                    <div>
+                        <b id="viewSender">Admin</b> <span style="color:#5f6368; font-size: 13px;" id="viewEmail">&lt;admin@repm.com&gt;</span>
+                        <div style="font-size: 12px; color: #5f6368;" id="viewTime">Oct 24, 2023, 10:00 AM</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="detail-body" id="viewBody">
+            Message content goes here...
+        </div>
 
+        <div id="replySection" class="reply-box">
+            <textarea id="replyText" placeholder="Click here to reply to Admin..."></textarea>
+            <div style="display:flex; justify-content: flex-end; margin-top: 10px;">
+                <button class="btn btn-primary" onclick="sendReply()">Send Reply</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const API = 'https://repm-project-production.up.railway.app';
+let currentTab = 'INBOX';
+let allMessages = [];
+let currentMsg = null;
+
+async function logout() {
+    await fetch(`${API}/logout`, { credentials: 'include', method: 'POST' });
+    window.location.href = '../login.html';
+}
+
+async function loadTab(tab, el) {
+    currentTab = tab;
+    document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+    if (el) el.classList.add('active');
+    showList();
+    fetchMessages();
+}
+
+async function fetchMessages() {
+    let endpoint = '/user/notifications/inbox';
+    if (currentTab === 'SENT') endpoint = '/user/notifications/sent';
+    
+    try {
+        const res = await fetch(`${API}${endpoint}`, { credentials: 'include' });
+        let data = await res.json();
         
-        function toggleDropdown() { document.getElementById("dropdownMenu").classList.toggle("hidden"); }
-        window.onclick = function(e) { if (!e.target.closest('.relative')) document.getElementById("dropdownMenu")?.classList.add("hidden"); };
+        if (currentTab === 'INBOX') {
+            data = data.filter(n => n.type === 'ADMIN_TO_USER');
+        } else if (currentTab === 'ALERTS') {
+            data = data.filter(n => n.type === 'AUTO');
+        }
         
-        async function logout() {
-            await fetch(`${API}/logout`, { method: 'POST', credentials: 'include' });
-            window.location.href = '../login.html';
-        }
+        allMessages = data.sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
+        renderList();
+    } catch(e) { console.error('Error fetching messages', e); }
+}
 
-        function formatNotification(n, colorClass) {
-            const time = n.timestamp ? new Date(n.timestamp).toLocaleString() : '';
-            return `<div class="border-l-4 ${colorClass} bg-opacity-10 p-5 mb-4 rounded-lg shadow-sm hover:shadow-md transition">
-        <p class="font-semibold text-lg">${n.message}</p>
-        <div class="text-sm text-gray-600 dark:text-gray-300 mt-2">Source: ${n.source} | ${time}</div>
-    </div>`;
-        }
+function renderList() {
+    const tbody = document.getElementById('msgTableBody');
+    if (allMessages.length === 0) {
+        tbody.innerHTML = '<tr><td style="text-align:center; padding:50px; color:#aaa;">No messages in this folder.</td></tr>';
+        return;
+    }
+    tbody.innerHTML = allMessages.map(m => `
+        <tr class="msg-row ${!m.isRead && currentTab==='INBOX' ? 'unread' : ''}" onclick="viewMessage(${m.id})">
+            <td class="msg-sender">${currentTab==='SENT' ? 'To: Admin' : (m.senderUsername || 'System')}</td>
+            <td class="msg-subject">
+                <span style="color:#5f6368">[${m.source}]</span> ${m.message.substring(0, 60)}${m.message.length > 60 ? '...' : ''}
+            </td>
+            <td class="msg-time">${formatDate(m.timestamp)}</td>
+        </tr>
+    `).join('');
+}
 
-        async function loadNotifications() {
-            try {
-                const res = await fetch(`${API}/user/notifications`, { credentials: 'include' });
-                if (res.status === 401) { window.location.href = '../login.html'; return; }
-                const data = await res.json();
+function formatDate(ts) {
+    const d = new Date(ts);
+    const now = new Date();
+    if (d.toDateString() === now.toDateString()) return d.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+    return d.toLocaleDateString([], {month: 'short', day: 'numeric'});
+}
 
-                const autoList = document.getElementById('autoList');
-                const adminList = document.getElementById('adminList');
+function viewMessage(id) {
+    currentMsg = allMessages.find(m => m.id === id);
+    if (!currentMsg) return;
+    
+    document.getElementById('listView').style.display = 'none';
+    document.getElementById('detailView').style.display = 'block';
+    
+    document.getElementById('viewSubject').textContent = `${currentMsg.source} Notification`;
+    document.getElementById('viewSender').textContent = currentMsg.senderUsername || 'System';
+    document.getElementById('viewEmail').textContent = currentTab === 'SENT' ? '<admin@repm.com>' : '';
+    document.getElementById('viewTime').textContent = new Date(currentMsg.timestamp).toLocaleString();
+    document.getElementById('viewBody').textContent = currentMsg.message;
+    document.getElementById('senderInitial').textContent = (currentMsg.senderUsername || 'S')[0].toUpperCase();
+    
+    // Only show reply for Admin messages in Inbox
+    if (currentTab === 'INBOX' && currentMsg.type === 'ADMIN_TO_USER') {
+        document.getElementById('replySection').style.display = 'block';
+    } else {
+        document.getElementById('replySection').style.display = 'none';
+    }
+    
+    if (!currentMsg.isRead && currentTab === 'INBOX') {
+        fetch(`${API}/user/notifications/${id}/read`, { method: 'POST', credentials: 'include' });
+    }
+}
 
-                if (!data.autoNotifications || data.autoNotifications.length === 0) {
-                    autoList.innerHTML = '<p class="text-gray-500">No system alerts yet.</p>';
-                } else {
-                    autoList.innerHTML = data.autoNotifications.map(n => formatNotification(n, 'border-red-500')).join('');
-                }
+function showList() {
+    document.getElementById('listView').style.display = 'block';
+    document.getElementById('detailView').style.display = 'none';
+}
 
-                if (!data.adminNotifications || data.adminNotifications.length === 0) {
-                    adminList.innerHTML = '<p class="text-gray-500">No admin messages yet.</p>';
-                } else {
-                    adminList.innerHTML = data.adminNotifications.map(n => formatNotification(n, 'border-blue-500')).join('');
-                }
-            } catch (e) {
-                console.error('Error loading notifications:', e);
-            }
-        }
+async function sendReply() {
+    const message = document.getElementById('replyText').value;
+    if (!message) return;
+    
+    try {
+        await fetch(`${API}/user/notifications/reply`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ parentId: currentMsg.id, message })
+        });
+        document.getElementById('replyText').value = '';
+        alert('Reply sent to Admin!');
+        showList();
+        loadTab('SENT');
+    } catch(e) { alert('Error sending reply'); }
+}
 
-        loadNotifications();
-    </script>
-
+loadTab('INBOX');
+</script>
 </body>
-
 </html>

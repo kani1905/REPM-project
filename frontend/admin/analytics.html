@@ -32,6 +32,36 @@
 </div>
 
 <div class="main">
+    <div class="box" style="border-top:5px solid #10b981;">
+        <h2>📄 Download Performance Reports</h2>
+        <div style="display:flex; gap:15px; flex-wrap:wrap; align-items:flex-end;">
+            <div style="flex:1; min-width:200px;">
+                <label>Select User</label><br>
+                <select id="reportUser" style="width:100%;">
+                    <option value="">-- Choose User --</option>
+                </select>
+            </div>
+            <div>
+                <label>Source</label><br>
+                <select id="reportSource">
+                    <option value="">All Sources</option>
+                    <option value="Solar">Solar</option>
+                    <option value="Wind">Wind</option>
+                    <option value="Hydro">Hydro</option>
+                </select>
+            </div>
+            <div>
+                <label>Time Range</label><br>
+                <select id="reportRange">
+                    <option value="today">Today</option>
+                    <option value="weekly">Weekly</option>
+                    <option value="monthly" selected>Monthly</option>
+                </select>
+            </div>
+            <button class="btn" style="background:#10b981;" onclick="downloadUserReport()">📥 Download PDF</button>
+        </div>
+    </div>
+
     <div class="box">
         <h2>📊 All Energy Data</h2>
         <div style="margin-bottom:15px; display:flex; gap:10px; align-items:flex-end;">
@@ -74,7 +104,7 @@ async function loadAnalytics() {
         tbody.innerHTML = data.map(d => `
             <tr>
                 <td>${d.id}</td>
-                <td>${d.userId || '-'}</td>
+                <td>${d.user ? d.user.username : '-'}</td>
                 <td>${d.source}</td>
                 <td>${(d.energyProduced||0).toFixed(2)}</td>
                 <td>${(d.energyConsumed||0).toFixed(2)}</td>
@@ -103,7 +133,29 @@ async function updateData() {
     } catch(e) { alert('Error updating'); }
 }
 
+async function loadUsers() {
+    try {
+        const res = await fetch(`${API}/admin/users`, { credentials: 'include' });
+        const users = await res.json();
+        const select = document.getElementById('reportUser');
+        select.innerHTML = '<option value="">-- Choose User --</option>' + 
+            users.map(u => `<option value="${u.id}">${u.username} (ID: ${u.id})</option>`).join('');
+    } catch(e) { console.error(e); }
+}
+
+function downloadUserReport() {
+    const userId = document.getElementById('reportUser').value;
+    const source = document.getElementById('reportSource').value;
+    const range = document.getElementById('reportRange').value;
+    if (!userId) { alert('Please select a user first'); return; }
+    
+    let url = `${API}/admin/user/${userId}/report?range=${range}`;
+    if (source) url += `&source=${source}`;
+    window.open(url, '_blank');
+}
+
 loadAnalytics();
+loadUsers();
 </script>
 </body>
 </html>

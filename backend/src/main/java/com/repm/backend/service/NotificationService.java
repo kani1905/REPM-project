@@ -21,14 +21,18 @@ public class NotificationService {
     // ================= CREATE NOTIFICATION =================
 
     public void createNotification(User user, String message, String source, String type) {
+        createNotification(user, message, source, type, "SYSTEM", null);
+    }
 
+    public void createNotification(User user, String message, String source, String type, String sender, Long parentId) {
         Notification n = new Notification();
         n.setUser(user);
         n.setMessage(message);
         n.setSource(source);
         n.setType(type);
+        n.setSenderUsername(sender);
+        n.setParentId(parentId);
         n.setTimestamp(LocalDateTime.now());
-
         notificationRepository.save(n);
     }
 
@@ -104,4 +108,28 @@ public class NotificationService {
     public List<Notification> getAdminNotifications(User user) {
         return notificationRepository.findByUserAndType(user, "ADMIN");
     }
+
+    public List<Notification> getAllAdminNotifications() {
+        return notificationRepository.findByType("ADMIN");
+    }
+
+    public List<Notification> getAllNotifications() {
+        return notificationRepository.findAll();
+    }
+
+    public List<Notification> getSentMessages(String username) {
+        return notificationRepository.findBySenderUsernameAndType(username, "ADMIN_TO_USER");
+    }
+
+    public List<Notification> getSentUserMessages(String username) {
+        return notificationRepository.findBySenderUsernameAndType(username, "USER_TO_ADMIN");
+    }
+
+    public void markAsRead(Long id) {
+        notificationRepository.findById(id).ifPresent(n -> {
+            n.setRead(true);
+            notificationRepository.save(n);
+        });
+    }
 }
+

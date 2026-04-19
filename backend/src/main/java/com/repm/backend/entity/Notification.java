@@ -17,6 +17,12 @@ public class Notification {
 
     private String type;
 
+    private boolean isRead = false;
+
+    private String senderUsername;
+
+    private Long parentId;
+
     private LocalDateTime timestamp = LocalDateTime.now();
 
     @ManyToOne
@@ -44,4 +50,16 @@ public class Notification {
     public String getType() { return type; }
 
     public void setType(String type) { this.type = type; }
+
+    public boolean isRead() { return isRead; }
+
+    public void setRead(boolean read) { isRead = read; }
+
+    public String getSenderUsername() { return senderUsername; }
+
+    public void setSenderUsername(String senderUsername) { this.senderUsername = senderUsername; }
+
+    public Long getParentId() { return parentId; }
+
+    public void setParentId(Long parentId) { this.parentId = parentId; }
 }

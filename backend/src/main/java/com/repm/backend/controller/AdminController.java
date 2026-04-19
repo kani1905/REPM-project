@@ -26,15 +26,18 @@ public class AdminController {
     private final NotificationService notificationService;
     private final UserRepository userRepository;
     private final PdfReportService pdfReportService;
+    private final com.repm.backend.repository.NotificationRepository notificationRepository;
 
     public AdminController(AdminService adminService,
                            NotificationService notificationService,
                            UserRepository userRepository,
-                           PdfReportService pdfReportService) {
+                           PdfReportService pdfReportService,
+                           com.repm.backend.repository.NotificationRepository notificationRepository) {
         this.adminService = adminService;
         this.notificationService = notificationService;
         this.userRepository = userRepository;
         this.pdfReportService = pdfReportService;
+        this.notificationRepository = notificationRepository;
     }
 
     // ================= DASHBOARD =================
@@ -88,16 +91,30 @@ public class AdminController {
     // ================= SEND NOTIFICATION =================
 
     @PostMapping("/notify")
-    public ResponseEntity<?> sendNotification(@RequestBody Map<String, Object> payload) {
+    public ResponseEntity<?> sendNotification(@RequestBody Map<String, Object> payload, Principal principal) {
         Long userId = Long.valueOf(payload.get("userId").toString());
         String message = payload.get("message").toString();
         String source = payload.get("source").toString();
 
-        userRepository.findById(userId).ifPresent(user ->
-            notificationService.createNotification(user, message, source, "ADMIN")
-        );
+        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+        notificationService.createNotification(user, message, source, "ADMIN_TO_USER", principal.getName(), null);
 
         return ResponseEntity.ok(Map.of("message", "Notification sent"));
+    }
+
+    @GetMapping("/notifications/sent")
+    public ResponseEntity<?> getSentNotifications(Principal principal) {
+        return ResponseEntity.ok(notificationService.getSentMessages(principal.getName()));
+    }
+
+    @PostMapping("/notifications/reply")
+    public ResponseEntity<?> replyToMessage(@RequestBody Map<String, Object> payload, Principal principal) {
+        Long parentId = Long.valueOf(payload.get("parentId").toString());
+        String message = payload.get("message").toString();
+        com.repm.backend.entity.Notification parent = notificationRepository.findById(parentId).orElseThrow(() -> new RuntimeException("Message not found"));
+        User recipient = userRepository.findByUsername(parent.getSenderUsername()).orElseThrow(() -> new RuntimeException("Recipient not found"));
+        notificationService.createNotification(recipient, message, "REPLY", "ADMIN_TO_USER", principal.getName(), parentId);
+        return ResponseEntity.ok(Map.of("message", "Reply sent"));
     }
 
     // ================= ALERT =================
@@ -114,6 +131,50 @@ public class AdminController {
         notificationService.createNotification(user, message, source, "ADMIN");
 
         return ResponseEntity.ok(Map.of("message", "Alert sent"));
+    }
+
+    // ================= NOTIFICATIONS =================
+
+    @GetMapping("/notifications/all")
+    public ResponseEntity<?> getAllNotifications() {
+        return ResponseEntity.ok(notificationService.getAllNotifications());
+    }
+
+    @GetMapping("/user/{id}/notifications")
+    public ResponseEntity<?> getUserNotifications(@PathVariable Long id) {
+        User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
+        return ResponseEntity.ok(notificationService.getUserNotifications(user));
+    }
+
+    @GetMapping("/user/{id}/report")
+    public ResponseEntity<byte[]> getUserReport(@PathVariable Long id,
+                                                 @RequestParam(defaultValue = "monthly") String range,
+                                                 @RequestParam(required = false) String source) {
+        User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
+        List<com.repm.backend.entity.EnergyData> data;
+
+        if (source != null && !source.isEmpty()) {
+            data = adminService.getUserEnergyDataBySource(id, source);
+        } else {
+            data = adminService.getUserEnergyData(id);
+        }
+
+        // Filter by range
+        final String finalRange = range;
+        java.time.LocalDate now = java.time.LocalDate.now();
+        data = data.stream().filter(d -> {
+            if ("today".equals(finalRange)) return d.getEntryDate().equals(now);
+            if ("weekly".equals(finalRange)) return d.getEntryDate().isAfter(now.minusWeeks(1));
+            return d.getEntryDate().isAfter(now.minusMonths(1));
+        }).collect(java.util.stream.Collectors.toList());
+
+        List<com.repm.backend.entity.Notification> notifications = notificationRepository.findByUser(user);
+
+        byte[] pdfBytes = pdfReportService.generatePerformanceReport(user, data, notifications, range);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Content-Disposition", "inline; filename=" + user.getUsername() + "_report.pdf");
+        return ResponseEntity.ok().headers(headers).contentType(MediaType.APPLICATION_PDF).body(pdfBytes);
     }
 
     // ================= ANALYTICS =================

@@ -10,4 +10,7 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
 
     List<Notification> findByUser(User user);
     List<Notification> findByUserAndType(User user, String type);
+    List<Notification> findByType(String type);
+    List<Notification> findBySenderUsernameAndType(String senderUsername, String type);
+    List<Notification> findByUserAndTypeOrderByTimestampDesc(User user, String type);
 }

@@ -7,6 +7,7 @@ import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfWriter;
 import com.repm.backend.entity.EnergyData;
 import com.repm.backend.entity.User;
+import com.repm.backend.entity.Notification;
 import org.springframework.stereotype.Service;
 
 import java.awt.Color;
@@ -20,7 +21,7 @@ public class PdfReportService {
 
     // private static final String LOGO_PATH = "C:\\Users\\kanik\\.gemini\\antigravity\\brain\\cdb5cb09-eb80-469d-be5d-7a1b4cda7900\\repm_logo_professional_1775274721949.png";
 
-    public ByteArrayInputStream generateUserReport(User user, List<EnergyData> data, String rangeLabel) {
+    public ByteArrayInputStream generateUserReport(User user, List<EnergyData> data, List<Notification> notifications, String rangeLabel) {
         Document document = new Document(PageSize.A4);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
 
@@ -71,10 +72,18 @@ public class PdfReportService {
             document.add(new Paragraph(" "));
 
             // Summary Stats Section
-            double totalProduced = data.stream().mapToDouble(d -> d.getEnergyProduced() != null ? d.getEnergyProduced() : 0).sum();
-            double totalConsumed = data.stream().mapToDouble(d -> d.getEnergyConsumed() != null ? d.getEnergyConsumed() : 0).sum();
-            double totalCo2Saved = data.stream().mapToDouble(d -> d.getCo2Consumed() != null ? d.getCo2Consumed() : 0).sum();
-            double avgEff = data.stream().mapToDouble(d -> d.getEfficiency() != null ? d.getEfficiency() : 0).average().orElse(0.0);
+            List<EnergyData> filteredData = data.stream()
+                    .filter(d -> d.getEnergyProduced() != null && d.getEnergyProduced() > 0)
+                    .toList();
+
+            // If everything is zero, we still want to show the original data in the table, 
+            // but calculations should be based on what's available.
+            // Actually, let's use the filtered list for calculations.
+            
+            double totalProduced = filteredData.stream().mapToDouble(EnergyData::getEnergyProduced).sum();
+            double totalConsumed = filteredData.stream().mapToDouble(EnergyData::getEnergyConsumed).sum();
+            double totalCo2Saved = filteredData.stream().mapToDouble(EnergyData::getCo2Consumed).sum();
+            double avgEff = filteredData.stream().mapToDouble(EnergyData::getEfficiency).average().orElse(0.0);
 
             PdfPTable summaryTable = new PdfPTable(4);
             summaryTable.setWidthPercentage(100);
@@ -110,7 +119,10 @@ public class PdfReportService {
             addCell(table, "Efficiency", fontHeader, Color.DARK_GRAY);
             addCell(table, "CO2 Saved", fontHeader, Color.DARK_GRAY);
 
-            for (EnergyData d : data) {
+            // Use original data for the table but skip zeros if there's at least one real entry
+            List<EnergyData> tableData = filteredData.isEmpty() ? data : filteredData;
+
+            for (EnergyData d : tableData) {
                 addCell(table, d.getEntryDate() != null ? d.getEntryDate().toString() : "N/A", fontNormal, Color.LIGHT_GRAY);
                 addCell(table, d.getSource() != null ? d.getSource() : "N/A", fontNormal, Color.LIGHT_GRAY);
                 addCell(table, String.format("%.2f", d.getEnergyProduced() != null ? d.getEnergyProduced() : 0), fontNormal, Color.LIGHT_GRAY);
@@ -120,6 +132,36 @@ public class PdfReportService {
             }
 
             document.add(table);
+            
+            // Recent Notifications Section
+            if (notifications != null && !notifications.isEmpty()) {
+                document.add(new Paragraph(" "));
+                Paragraph notifTitle = new Paragraph("Recent System Alerts & Notifications", fontSubtitle);
+                notifTitle.setSpacingBefore(10f);
+                document.add(notifTitle);
+
+                PdfPTable notifTable = new PdfPTable(3);
+                notifTable.setWidthPercentage(100);
+                notifTable.setSpacingBefore(10f);
+                notifTable.setWidths(new float[]{2, 6, 2});
+
+                addCell(notifTable, "Type", fontHeader, Color.DARK_GRAY);
+                addCell(notifTable, "Message", fontHeader, Color.DARK_GRAY);
+                addCell(notifTable, "Date", fontHeader, Color.DARK_GRAY);
+
+                // Show only last 10 notifications
+                List<Notification> latestNotifs = notifications.stream()
+                        .sorted((n1, n2) -> n2.getTimestamp().compareTo(n1.getTimestamp()))
+                        .limit(10)
+                        .toList();
+
+                for (Notification n : latestNotifs) {
+                    addCell(notifTable, n.getType(), fontNormal, Color.LIGHT_GRAY);
+                    addCell(notifTable, n.getMessage(), fontNormal, Color.LIGHT_GRAY);
+                    addCell(notifTable, n.getTimestamp().toLocalDate().toString(), fontNormal, Color.LIGHT_GRAY);
+                }
+                document.add(notifTable);
+            }
             
             Paragraph footer = new Paragraph("\n\nThis is a confidential report generated for " + (user.getFullName() != null ? user.getFullName() : "User") + ".\n© 2026 REPM Monitor - Promoting Sustainable Energy.", fontFooter);
             footer.setAlignment(Element.ALIGN_CENTER);
@@ -176,9 +218,13 @@ public class PdfReportService {
             document.add(new Paragraph(" "));
 
             // Aggregated Summary
-            double totalProduced = allData.stream().mapToDouble(d -> d.getEnergyProduced() != null ? d.getEnergyProduced() : 0).sum();
-            double totalConsumed = allData.stream().mapToDouble(d -> d.getEnergyConsumed() != null ? d.getEnergyConsumed() : 0).sum();
-            double avgEff = allData.stream().mapToDouble(d -> d.getEfficiency() != null ? d.getEfficiency() : 0).average().orElse(0.0);
+            List<EnergyData> filteredAllData = allData.stream()
+                    .filter(d -> d.getEnergyProduced() != null && d.getEnergyProduced() > 0)
+                    .toList();
+
+            double totalProduced = filteredAllData.stream().mapToDouble(EnergyData::getEnergyProduced).sum();
+            double totalConsumed = filteredAllData.stream().mapToDouble(EnergyData::getEnergyConsumed).sum();
+            double avgEff = filteredAllData.stream().mapToDouble(EnergyData::getEfficiency).average().orElse(0.0);
 
             PdfPTable adminSummary = new PdfPTable(3);
             adminSummary.setWidthPercentage(100);
@@ -208,8 +254,8 @@ public class PdfReportService {
             addCell(userTable, "Efficiency Avg", fontHeader, Color.DARK_GRAY);
 
             for (User u : users) {
-                long count = allData.stream().filter(d -> d.getUser() != null && d.getUser().getId().equals(u.getId())).count();
-                double userAvgEff = allData.stream()
+                long count = filteredAllData.stream().filter(d -> d.getUser() != null && d.getUser().getId().equals(u.getId())).count();
+                double userAvgEff = filteredAllData.stream()
                         .filter(d -> d.getUser() != null && d.getUser().getId().equals(u.getId()))
                         .mapToDouble(d -> d.getEfficiency() != null ? d.getEfficiency() : 0)
                         .average().orElse(0.0);

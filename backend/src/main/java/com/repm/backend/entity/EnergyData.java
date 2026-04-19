@@ -29,7 +29,6 @@ public class EnergyData {
     private Double co2Consumed;
     private Double co2Produced;
 
-    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;

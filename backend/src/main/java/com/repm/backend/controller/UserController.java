@@ -32,17 +32,20 @@ public class UserController {
     private final UserRepository userRepository;
     private final UserSourceRepository userSourceRepository;
     private final PdfReportService pdfReportService;
+    private final com.repm.backend.repository.NotificationRepository notificationRepository;
 
     public UserController(UserService userService,
                           NotificationService notificationService,
                           UserRepository userRepository,
                           UserSourceRepository userSourceRepository,
-                          PdfReportService pdfReportService) {
+                          PdfReportService pdfReportService,
+                          com.repm.backend.repository.NotificationRepository notificationRepository) {
         this.userService = userService;
         this.notificationService = notificationService;
         this.userRepository = userRepository;
         this.userSourceRepository = userSourceRepository;
         this.pdfReportService = pdfReportService;
+        this.notificationRepository = notificationRepository;
     }
 
     private List<String> getAllowedSourcesFromDB(User user) {
@@ -261,7 +264,8 @@ public ResponseEntity<?> submitInput(@RequestBody Map<String, Object> payload,
         }
 
         String reportTitle = range + (source != null && !source.equalsIgnoreCase("All") ? " (" + source + ")" : "");
-        java.io.ByteArrayInputStream bis = pdfReportService.generateUserReport(user, targetData, reportTitle.toUpperCase());
+        List<com.repm.backend.entity.Notification> notifications = notificationService.getUserNotifications(user);
+        java.io.ByteArrayInputStream bis = pdfReportService.generateUserReport(user, targetData, notifications, reportTitle.toUpperCase());
         byte[] pdfBytes = bis.readAllBytes();
 
         HttpHeaders headers = new HttpHeaders();
@@ -273,4 +277,38 @@ public ResponseEntity<?> submitInput(@RequestBody Map<String, Object> payload,
                 .contentType(MediaType.APPLICATION_PDF)
                 .body(pdfBytes);
     }
-}
+
+    // ================= MESSAGING =================
+
+    @GetMapping("/notifications/inbox")
+    public ResponseEntity<?> getInbox(Principal principal) {
+        User user = userRepository.findByUsername(principal.getName()).orElseThrow(() -> new RuntimeException("User not found"));
+        return ResponseEntity.ok(notificationService.getUserNotifications(user));
+    }
+
+    @GetMapping("/notifications/sent")
+    public ResponseEntity<?> getSent(Principal principal) {
+        return ResponseEntity.ok(notificationService.getSentUserMessages(principal.getName()));
+    }
+
+    @PostMapping("/notifications/reply")
+    public ResponseEntity<?> reply(@RequestBody Map<String, Object> payload, Principal principal) {
+        Long parentId = Long.valueOf(payload.get("parentId").toString());
+        String message = payload.get("message").toString();
+        com.repm.backend.entity.Notification parent = notificationRepository.findById(parentId).orElseThrow(() -> new RuntimeException("Message not found"));
+        
+        User admin = userRepository.findByUsername("admin").orElse(null);
+        if (admin == null) {
+            admin = userRepository.findAll().stream().filter(u -> u.getRole().equals("ADMIN")).findFirst().orElse(null);
+        }
+        
+        notificationService.createNotification(admin, message, "REPLY", "USER_TO_ADMIN", principal.getName(), parentId);
+        return ResponseEntity.ok(Map.of("message", "Reply sent to Admin"));
+    }
+
+    @PostMapping("/notifications/{id}/read")
+    public ResponseEntity<?> markRead(@PathVariable Long id) {
+        notificationService.markAsRead(id);
+        return ResponseEntity.ok(Map.of("message", "Read"));
+    }
+}
