@@ -1,285 +1,122 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Messages - REPM Admin</title>
+    <title>Send Notifications - REPM Admin</title>
     <meta charset="UTF-8">
     <style>
-        :root {
-            --primary: #1e3c72;
-            --secondary: #2a5298;
-            --bg: #f6f8fc;
-            --sidebar-bg: #fff;
-            --text: #444;
-            --accent: #d93025;
-        }
-        body { margin:0; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:var(--bg); display:flex; height: 100vh; overflow: hidden; }
+        body { margin:0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:#e0f7fa; display:flex; height: 100vh; }
         
         /* Sidebar */
-        .sidebar { width: 250px; background: var(--sidebar-bg); border-right: 1px solid #ddd; display: flex; flex-direction: column; padding: 20px 0; }
-        .sidebar-item { padding: 12px 25px; margin: 4px 10px; border-radius: 20px; cursor: pointer; color: var(--text); font-weight: 500; display: flex; align-items: center; gap: 15px; transition: 0.2s; }
-        .sidebar-item:hover { background: #f1f3f4; }
-        .sidebar-item.active { background: #e8f0fe; color: #1a73e8; }
-        .compose-btn { background: #c2e7ff; color: #001d35; padding: 18px 24px; margin: 10px 20px 30px; border-radius: 16px; text-align: center; cursor: pointer; font-weight: 600; box-shadow: 0 1px 3px rgba(0,0,0,0.1); transition: 0.3s; }
-        .compose-btn:hover { box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
-
-        /* Main Content */
-        .main { flex: 1; display: flex; flex-direction: column; }
-        .header { height: 64px; background: #fff; border-bottom: 1px solid #ddd; display: flex; align-items: center; padding: 0 20px; gap: 20px; }
-        .search-bar { flex: 1; max-width: 720px; background: #f1f3f4; border-radius: 8px; padding: 10px 20px; border: none; font-size: 16px; }
+        .sidebar { width: 220px; background: #1e3c72; color: white; display: flex; flex-direction: column; padding: 20px 0; position: fixed; height: 100%; }
+        .sidebar h2 { text-align: center; margin-bottom: 30px; font-size: 24px; }
+        .sidebar a { color: white; padding: 15px 25px; text-decoration: none; font-weight: bold; display: flex; align-items: center; gap: 10px; transition: 0.3s; }
+        .sidebar a:hover, .sidebar a.active { background: rgba(255,255,255,0.1); border-left: 4px solid #fff; }
         
-        .content { flex: 1; overflow-y: auto; }
-        .msg-list { width: 100%; border-collapse: collapse; }
-        .msg-row { border-bottom: 1px solid #eee; cursor: pointer; transition: 0.1s; background: #fff; }
-        .msg-row:hover { box-shadow: inset 1px 0 0 #dadce0, inset -1px 0 0 #dadce0, 0 1px 2px 0 rgba(60,64,67,.3), 0 1px 3px 1px rgba(60,64,67,.15); z-index: 1; }
-        .msg-row.unread { background: #fff; font-weight: bold; }
-        .msg-row td { padding: 12px 15px; color: #202124; font-size: 14px; }
-        .msg-sender { width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .msg-subject { flex: 1; }
-        .msg-time { width: 100px; text-align: right; color: #5f6368; font-size: 12px; }
-
-        /* Detail View */
-        .detail-view { padding: 30px; background: #fff; min-height: 100%; display: none; }
-        .detail-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px; }
-        .detail-body { line-height: 1.6; color: #3c4043; font-size: 15px; white-space: pre-wrap; }
-        .reply-box { margin-top: 40px; border: 1px solid #ddd; border-radius: 8px; padding: 20px; }
-        .reply-box textarea { width: 100%; border: none; outline: none; resize: vertical; min-height: 100px; font-family: inherit; font-size: 14px; }
-
-        /* Modals */
-        .modal { display:none; position:fixed; z-index:100; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.5); }
-        .modal-content { background:#fff; margin: 10% auto; width: 500px; border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.2); }
-        .modal-header { padding: 15px 20px; background: #f2f6fc; border-radius: 8px 8px 0 0; display: flex; justify-content: space-between; align-items: center; }
-        .modal-body { padding: 20px; display: flex; flex-direction: column; gap: 15px; }
-        .modal-body input, .modal-body select, .modal-body textarea { padding: 10px; border: 1px solid #ddd; border-radius: 4px; }
+        .main { margin-left: 220px; padding: 40px; flex: 1; }
         
-        .btn { padding: 10px 24px; border-radius: 4px; border: none; cursor: pointer; font-weight: 500; }
-        .btn-primary { background: #1a73e8; color: #fff; }
+        .card { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        .card-header { display: flex; items-center: center; gap: 10px; margin-bottom: 25px; }
+        .card-header h2 { margin: 0; color: #1e3c72; font-size: 20px; }
         
-        .back-btn { cursor: pointer; color: #5f6368; padding: 8px; border-radius: 50%; }
-        .back-btn:hover { background: #f1f3f4; }
+        .form-row { display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap; }
+        .input-group { display: flex; flex-direction: column; gap: 5px; }
+        .input-group label { font-size: 13px; font-weight: bold; color: #555; }
+        .input-group input, .input-group select { padding: 10px; border: 1px solid #ddd; border-radius: 8px; background: #f8f9fa; min-width: 150px; }
+        .input-group input:focus { outline: none; border-color: #1e3c72; }
+        
+        .btn-send { background: #1e3c72; color: white; border: none; padding: 12px 25px; border-radius: 8px; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 8px; transition: 0.3s; margin-left: auto; }
+        .btn-send:hover { background: #2a5298; transform: translateY(-2px); }
+        
+        .logout-btn { margin-top: auto; background: #d32f2f; }
     </style>
 </head>
 <body>
 
 <div class="sidebar">
-    <div style="padding: 10px 25px; font-size: 22px; font-weight: bold; color: var(--primary);">⚡ REPM Mail</div>
-    <div class="compose-btn" onclick="openCompose()">✏ Compose</div>
-    <div class="sidebar-item active" onclick="loadTab('INBOX', this)">📥 Inbox</div>
-    <div class="sidebar-item" onclick="loadTab('SENT', this)">📤 Sent</div>
-    <div class="sidebar-item" onclick="loadTab('ALERTS', this)">⚠️ System Alerts</div>
-    
-    <div style="margin-top: auto; padding: 20px;">
-        <div class="sidebar-item" onclick="window.location.href='dashboard.html'">🏠 Back to Dashboard</div>
-        <div class="sidebar-item" onclick="logout()" style="color: #d93025;">🚪 Logout</div>
-    </div>
+    <h2>⚡ REPM</h2>
+    <a href="dashboard.html">🏠 Dashboard</a>
+    <a href="analytics.html">📊 Analytics</a>
+    <a href="users.html">👥 Users</a>
+    <a href="leaderboard.html">🏆 Leaderboard</a>
+    <a href="notifications.html" class="active">🔔 Notifications</a>
+    <a href="settings.html">⚙ Settings</a>
+    <a href="#" onclick="logout()" class="logout-btn">🚪 Logout</a>
 </div>
 
 <div class="main">
-    <div class="header">
-        <input type="text" class="search-bar" placeholder="Search messages...">
-        <div style="margin-left: auto; display: flex; align-items: center; gap: 15px;">
-            <span id="adminName">Admin</span>
-            <div style="width: 32px; height: 32px; background: #1e3c72; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold;">A</div>
+    <div class="card">
+        <div class="card-header">
+            <span>📢</span>
+            <h2>Send Notification to User</h2>
         </div>
-    </div>
-
-    <div class="content" id="listView">
-        <table class="msg-list">
-            <tbody id="msgTableBody">
-                <!-- Messages populate here -->
-            </tbody>
-        </table>
-    </div>
-
-    <div class="content detail-view" id="detailView">
-        <div class="back-btn" onclick="showList()" style="display:inline-block; margin-bottom: 20px;">⬅ Back</div>
-        <div class="detail-header">
-            <div>
-                <h2 id="viewSubject">Message Subject</h2>
-                <div style="display:flex; align-items:center; gap:10px;">
-                    <div style="width: 40px; height: 40px; background: #eee; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold;" id="senderInitial">U</div>
-                    <div>
-                        <b id="viewSender">Sender Name</b> <span style="color:#5f6368; font-size: 13px;" id="viewEmail">&lt;user@example.com&gt;</span>
-                        <div style="font-size: 12px; color: #5f6368;" id="viewTime">Oct 24, 2023, 10:00 AM</div>
-                    </div>
-                </div>
+        
+        <div class="form-row">
+            <div class="input-group">
+                <label>User ID</label>
+                <input type="number" id="userId" placeholder="Enter User ID">
             </div>
-        </div>
-        <div class="detail-body" id="viewBody">
-            Message content goes here...
-        </div>
-
-        <div class="reply-box">
-            <textarea id="replyText" placeholder="Click here to reply..."></textarea>
-            <div style="display:flex; justify-content: flex-end; margin-top: 10px;">
-                <button class="btn btn-primary" onclick="sendReply()">Send Reply</button>
+            
+            <div class="input-group">
+                <label>Source</label>
+                <select id="source">
+                    <option value="Solar">Solar</option>
+                    <option value="Wind">Wind</option>
+                    <option value="Hydro">Hydro</option>
+                    <option value="System">System</option>
+                </select>
             </div>
-        </div>
-    </div>
-</div>
-
-<!-- Compose Modal -->
-<div id="composeModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <b>New Message</b>
-            <span style="cursor:pointer;" onclick="closeCompose()">✖</span>
-        </div>
-        <div class="modal-body">
-            <select id="compUser">
-                <option value="">Select Recipient User</option>
-            </select>
-            <select id="compSource">
-                <option value="Solar">Solar</option>
-                <option value="Wind">Wind</option>
-                <option value="Hydro">Hydro</option>
-                <option value="System">General System</option>
-            </select>
-            <textarea id="compMessage" placeholder="Type your message here..." style="min-height: 150px;"></textarea>
-            <div style="display:flex; justify-content: flex-end;">
-                <button class="btn btn-primary" onclick="sendMessage()">Send</button>
+            
+            <div class="input-group" style="flex: 1;">
+                <label>Message</label>
+                <input type="text" id="message" placeholder="Enter details...">
             </div>
+            
+            <button class="btn-send" onclick="sendNotification()">
+                📩 Send
+            </button>
         </div>
     </div>
 </div>
 
 <script>
 const API = 'https://repm-project-production.up.railway.app';
-let currentTab = 'INBOX';
-let allMessages = [];
-let currentMsg = null;
 
 async function logout() {
     await fetch(`${API}/logout`, { credentials: 'include', method: 'POST' });
     window.location.href = '../login.html';
 }
 
-async function loadTab(tab, el) {
-    currentTab = tab;
-    document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
-    if (el) el.classList.add('active');
-    showList();
-    fetchMessages();
-}
+async function sendNotification() {
+    const userId = document.getElementById('userId').value;
+    const source = document.getElementById('source').value;
+    const message = document.getElementById('message').value;
 
-async function fetchMessages() {
-    let endpoint = '/admin/notifications/all';
-    if (currentTab === 'SENT') endpoint = '/admin/notifications/sent';
-    
-    try {
-        const res = await fetch(`${API}${endpoint}`, { credentials: 'include' });
-        let data = await res.json();
-        
-        if (currentTab === 'INBOX') {
-            data = data.filter(n => n.type === 'USER_TO_ADMIN');
-        } else if (currentTab === 'ALERTS') {
-            data = data.filter(n => n.type === 'AUTO');
-        }
-        
-        allMessages = data.sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
-        renderList();
-    } catch(e) { console.error('Error fetching messages', e); }
-}
-
-function renderList() {
-    const tbody = document.getElementById('msgTableBody');
-    if (allMessages.length === 0) {
-        tbody.innerHTML = '<tr><td style="text-align:center; padding:50px; color:#aaa;">No messages in this folder.</td></tr>';
+    if (!userId || !message) {
+        alert("Please fill in User ID and Message");
         return;
     }
-    tbody.innerHTML = allMessages.map(m => `
-        <tr class="msg-row ${!m.isRead && currentTab==='INBOX' ? 'unread' : ''}" onclick="viewMessage(${m.id})">
-            <td class="msg-sender">${currentTab==='SENT' ? 'To: ' + (m.user ? m.user.username : 'User') : (m.senderUsername || 'System')}</td>
-            <td class="msg-subject">
-                <span style="color:#5f6368">[${m.source}]</span> ${m.message.substring(0, 60)}${m.message.length > 60 ? '...' : ''}
-            </td>
-            <td class="msg-time">${formatDate(m.timestamp)}</td>
-        </tr>
-    `).join('');
-}
 
-function formatDate(ts) {
-    const d = new Date(ts);
-    const now = new Date();
-    if (d.toDateString() === now.toDateString()) return d.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-    return d.toLocaleDateString([], {month: 'short', day: 'numeric'});
-}
-
-function viewMessage(id) {
-    currentMsg = allMessages.find(m => m.id === id);
-    if (!currentMsg) return;
-    
-    document.getElementById('listView').style.display = 'none';
-    document.getElementById('detailView').style.display = 'block';
-    
-    document.getElementById('viewSubject').textContent = `Re: ${currentMsg.source} Performance Notification`;
-    document.getElementById('viewSender').textContent = currentMsg.senderUsername || 'System';
-    document.getElementById('senderInitial').textContent = (currentMsg.senderUsername || 'S')[0].toUpperCase();
-    
-    if (!currentMsg.isRead && currentTab === 'INBOX') {
-        fetch(`${API}/admin/notifications/${id}/read`, { method: 'POST', credentials: 'include' });
-    }
-}
-
-function showList() {
-    document.getElementById('listView').style.display = 'block';
-    document.getElementById('detailView').style.display = 'none';
-}
-
-function openCompose() {
-    document.getElementById('composeModal').style.display = 'block';
-    loadUsers();
-}
-
-function closeCompose() {
-    document.getElementById('composeModal').style.display = 'none';
-}
-
-async function loadUsers() {
-    const res = await fetch(`${API}/admin/users`, { credentials: 'include' });
-    const users = await res.json();
-    const select = document.getElementById('compUser');
-    select.innerHTML = '<option value="">Select Recipient User</option>' + 
-        users.map(u => `<option value="${u.id}">${u.username}</option>`).join('');
-}
-
-async function sendMessage() {
-    const userId = document.getElementById('compUser').value;
-    const source = document.getElementById('compSource').value;
-    const message = document.getElementById('compMessage').value;
-    
-    if (!userId || !message) return alert('Please select a user and type a message');
-    
     try {
-        await fetch(`${API}/admin/notify`, {
+        const res = await fetch(`${API}/admin/notify`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include',
             body: JSON.stringify({ userId, message, source })
         });
-        closeCompose();
-        loadTab('SENT');
-    } catch(e) { alert('Error sending message'); }
+        
+        if (res.ok) {
+            alert("Notification sent successfully!");
+            document.getElementById('userId').value = '';
+            document.getElementById('message').value = '';
+        } else {
+            const err = await res.json();
+            alert("Error: " + (err.message || "Failed to send"));
+        }
+    } catch (e) {
+        alert("Error connecting to server");
+    }
 }
-
-async function sendReply() {
-    const message = document.getElementById('replyText').value;
-    if (!message) return;
-    
-    try {
-        await fetch(`${API}/admin/notifications/reply`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-            body: JSON.stringify({ parentId: currentMsg.id, message })
-        });
-        document.getElementById('replyText').value = '';
-        alert('Reply sent!');
-        showList();
-        loadTab('SENT');
-    } catch(e) { alert('Error sending reply'); }
-}
-
-loadTab('INBOX');
 </script>
+
 </body>
 </html>
