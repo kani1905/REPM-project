@@ -210,10 +210,10 @@ public class AdminService {
     }
 
     public List<EnergyData> getUserEnergyData(Long userId) {
-        return energyDataRepository.findByUserId(userId);
+        return energyDataRepository.findByUser_Id(userId);
     }
 
     public List<EnergyData> getUserEnergyDataBySource(Long userId, String source) {
-        return energyDataRepository.findByUserIdAndSource(userId, source);
+        return energyDataRepository.findByUser_IdAndSource(userId, source);
     }
 }
