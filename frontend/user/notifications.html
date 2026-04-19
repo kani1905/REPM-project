@@ -1,85 +1,68 @@
-<!DOCTYPE html>
-<html>
 <head>
     <title>Notifications - REPM</title>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config = { darkMode: 'class' }</script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        if (localStorage.getItem("theme") === "dark") document.documentElement.classList.add("dark");
+        else document.documentElement.classList.remove("dark");
+    </script>
     <style>
-        body { margin:0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:#f0f7ff; display:flex; height: 100vh; overflow: hidden; }
-        
-        /* Sidebar */
-        .sidebar { width: 220px; background: #1e3c72; color: white; display: flex; flex-direction: column; padding: 20px 0; flex-shrink: 0; }
-        .sidebar-logo { display: flex; align-items: center; gap: 10px; padding: 0 25px 30px; }
-        .sidebar-logo .icon { background: #ffd700; color: #1e3c72; width: 30px; height: 30px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-weight: bold; }
-        .sidebar a { color: white; padding: 12px 25px; text-decoration: none; display: flex; align-items: center; gap: 12px; font-size: 14px; opacity: 0.8; transition: 0.3s; }
-        .sidebar a:hover, .sidebar a.active { background: rgba(255,255,255,0.15); opacity: 1; border-left: 4px solid #fff; }
-        
-        .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-        .header { padding: 30px 40px; display: flex; align-items: center; gap: 15px; }
-        .header h1 { margin: 0; font-size: 24px; color: #111; }
-        .header .bell-icon { color: #ffd700; font-size: 28px; }
-        
-        .tab-bar { padding: 0 40px 20px; display: flex; gap: 15px; }
-        .tab-btn { padding: 10px 25px; border-radius: 8px; border: none; color: white; font-weight: bold; cursor: pointer; transition: 0.3s; font-size: 13px; display: flex; align-items: center; gap: 8px; }
-        .btn-auto { background: #ef4444; } /* Red for Auto Alerts */
-        .btn-admin { background: #3b82f6; } /* Blue for Admin Messages */
-        .tab-btn:hover { filter: brightness(1.1); transform: translateY(-1px); }
-        .tab-btn.active { box-shadow: 0 0 0 3px rgba(0,0,0,0.1); }
-        
-        .content { flex: 1; overflow-y: auto; padding: 0 40px 40px; }
-        .section-title { color: #d32f2f; font-weight: bold; margin: 20px 0; display: flex; align-items: center; gap: 10px; font-size: 16px; }
-        
-        /* Alert Card */
-        .alert-card { background: white; border-radius: 12px; padding: 20px; margin-bottom: 15px; border-left: 5px solid #ef4444; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-        .alert-card.ADMIN_TO_USER { border-left-color: #3b82f6; }
-        .alert-header { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
-        .alert-header .status-icon { font-size: 18px; }
-        .alert-header .msg-text { font-weight: 700; color: #333; font-size: 15px; }
-        .alert-footer { color: #777; font-size: 12px; margin-left: 28px; }
-        
-        .logout-container { margin-top: auto; padding: 20px; }
-        .logout-btn { background: #d32f2f; width: 100%; color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        body { font-family: 'Inter', sans-serif; }
     </style>
 </head>
-<body>
+<body class="flex h-screen bg-gray-50 dark:bg-gray-900 dark:text-white overflow-hidden text-base">
 
-<div class="sidebar">
-    <div class="sidebar-logo">
-        <div class="icon">⚡</div>
-        <div>
-            <div style="font-weight:bold; font-size:16px;">REPM</div>
-            <div style="font-size:10px; opacity:0.7;">ENERGY MONITOR</div>
+    <!-- ===== SIDEBAR ===== -->
+    <aside class="w-64 h-screen bg-blue-900 dark:bg-gray-900 text-white flex flex-col justify-between shadow-2xl flex-shrink-0 z-50">
+        <div class="overflow-y-auto">
+            <div class="p-6 border-b border-white/10">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-yellow-400 rounded-xl flex items-center justify-center text-blue-900 font-bold text-lg shadow-lg shadow-yellow-500/20">⚡</div>
+                    <div>
+                        <h1 class="text-xl font-bold tracking-tight">REPM</h1>
+                        <p class="text-blue-200 text-[10px] uppercase tracking-widest font-bold opacity-70">Energy Monitor</p>
+                    </div>
+                </div>
+            </div>
+
+            <ul class="space-y-1 px-3 py-4">
+                <li><a href="dashboard.html" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all opacity-80 hover:opacity-100 hover:bg-white/10">🏠 <span>Dashboard</span></a></li>
+                <li><a href="input.html" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all opacity-80 hover:opacity-100 hover:bg-white/10">➕ <span>Add Data</span></a></li>
+                <li><a href="analytics.html" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all opacity-80 hover:opacity-100 hover:bg-white/10">📊 <span>Analytics</span></a></li>
+                <li><a href="notifications.html" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-white/20 font-bold shadow-inner relative">🔔 <span>Notifications</span> <span id="notifBadge" class="hidden ml-auto bg-red-500 text-white text-[10px] rounded-full w-5 h-5 flex items-center justify-center border-2 border-blue-800">!</span></a></li>
+                <li><a href="settings.html" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all opacity-80 hover:opacity-100 hover:bg-white/10">⚙️ <span>Settings</span></a></li>
+            </ul>
         </div>
-    </div>
-    <a href="dashboard.html">🏠 Dashboard</a>
-    <a href="input.html">➕ Add Data</a>
-    <a href="analytics.html">📊 Analytics</a>
-    <a href="notifications.html" class="active">🔔 Notifications</a>
-    <a href="settings.html">⚙ Settings</a>
-    
-    <div class="logout-container">
-        <button onclick="logout()" class="logout-btn">🚪 Logout</button>
-    </div>
-</div>
-
-<div class="main">
-    <div class="header">
-        <span class="bell-icon">🔔</span>
-        <h1>Notifications</h1>
-    </div>
-
-    <div class="tab-bar">
-        <button class="tab-btn btn-auto active" onclick="switchTab('AUTO', this)">⚡ Auto Alerts</button>
-        <button class="tab-btn btn-admin" onclick="switchTab('ADMIN_TO_USER', this)">👤 Admin Messages</button>
-    </div>
-
-    <div class="content">
-        <div id="sectionHeader" class="section-title">⚡ System Generated Alerts</div>
-        <div id="notifContainer">
-            <!-- Cards will be injected here -->
-            <p style="text-align:center; color:#999; margin-top:50px;">Loading alerts...</p>
+        <div class="p-4 border-t border-white/10">
+            <button onclick="logout()" class="w-full bg-red-500/80 hover:bg-red-500 py-3 rounded-xl text-center font-bold transition-all shadow-lg shadow-red-900/20">🚪 Logout</button>
         </div>
+    </aside>
+
+    <div class="flex-1 flex flex-col overflow-y-auto">
+        <header class="bg-white dark:bg-gray-800 border-b dark:border-gray-700 px-8 py-4 flex items-center justify-between shadow-sm flex-shrink-0">
+            <div>
+                <h2 class="text-2xl font-bold text-gray-800 dark:text-white">🔔 Notifications</h2>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Manage your energy alerts and administrator messages</p>
+            </div>
+        </header>
+
+        <main class="p-8 space-y-6">
+            <div class="flex gap-4">
+                <button id="btnAuto" class="px-6 py-3 rounded-xl font-bold shadow-lg transition-all bg-red-500 text-white" onclick="switchTab('AUTO', this)">⚡ Auto Alerts</button>
+                <button id="btnAdmin" class="px-6 py-3 rounded-xl font-bold shadow-lg transition-all bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-blue-500 hover:text-white" onclick="switchTab('ADMIN_TO_USER', this)">👤 Admin Messages</button>
+            </div>
+
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border dark:border-gray-700 p-8">
+                <h3 id="sectionHeader" class="text-lg font-bold mb-6 text-red-500">⚡ System Generated Alerts</h3>
+                <div id="notifContainer" class="space-y-4">
+                    <p class="text-center py-10 text-gray-400">Loading alerts...</p>
+                </div>
+            </div>
+        </main>
     </div>
-</div>
 
 <script>
 const API = 'https://repm-project-production.up.railway.app';
@@ -92,16 +75,22 @@ async function logout() {
 
 function switchTab(type, el) {
     currentType = type;
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    el.classList.add('active');
     
+    // UI Update
+    const btnAuto = document.getElementById('btnAuto');
+    const btnAdmin = document.getElementById('btnAdmin');
     const header = document.getElementById('sectionHeader');
+
     if (type === 'AUTO') {
+        btnAuto.className = "px-6 py-3 rounded-xl font-bold shadow-lg transition-all bg-red-500 text-white";
+        btnAdmin.className = "px-6 py-3 rounded-xl font-bold shadow-lg transition-all bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-blue-500 hover:text-white";
         header.innerHTML = '⚡ System Generated Alerts';
-        header.style.color = '#d32f2f';
+        header.className = 'text-lg font-bold mb-6 text-red-500';
     } else {
+        btnAdmin.className = "px-6 py-3 rounded-xl font-bold shadow-lg transition-all bg-blue-600 text-white";
+        btnAuto.className = "px-6 py-3 rounded-xl font-bold shadow-lg transition-all bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-red-500 hover:text-white";
         header.innerHTML = '👤 Messages from Administrator';
-        header.style.color = '#3b82f6';
+        header.className = 'text-lg font-bold mb-6 text-blue-600';
     }
     
     fetchNotifications();
@@ -113,41 +102,43 @@ async function fetchNotifications() {
         const res = await fetch(`${API}/user/notifications/inbox`, { credentials: 'include' });
         const data = await res.json();
         
-        // Filter by type
         const filtered = data.filter(n => {
             if (currentType === 'AUTO') return n.type === 'AUTO';
             return n.type === 'ADMIN_TO_USER' || n.type === 'ADMIN';
         });
 
         if (filtered.length === 0) {
-            container.innerHTML = `<p style="text-align:center; color:#999; margin-top:50px;">No ${currentType === 'AUTO' ? 'alerts' : 'messages'} found.</p>`;
+            container.innerHTML = `<p class="text-center py-10 text-gray-400 italic">No ${currentType === 'AUTO' ? 'alerts' : 'messages'} found.</p>`;
             return;
         }
 
         container.innerHTML = filtered.map(n => {
             let icon = '⚡';
-            if (n.message.toLowerCase().includes('excellent') || n.message.toLowerCase().includes('great')) icon = '✅';
-            else if (n.message.toLowerCase().includes('high')) icon = '❌';
+            let colorClass = 'border-red-500';
+            if (n.message.toLowerCase().includes('excellent') || n.message.toLowerCase().includes('great')) {
+                icon = '✅';
+                colorClass = 'border-green-500';
+            }
+            if (n.type.includes('ADMIN')) colorClass = 'border-blue-500';
             
             return `
-                <div class="alert-card ${n.type}">
-                    <div class="alert-header">
-                        <span class="status-icon">${icon}</span>
-                        <span class="msg-text">${n.message}</span>
+                <div class="p-6 bg-gray-50 dark:bg-gray-700/30 rounded-xl border-l-4 ${colorClass} shadow-sm transition-all hover:translate-x-1">
+                    <div class="flex items-center gap-3 mb-2">
+                        <span class="text-xl">${icon}</span>
+                        <span class="font-bold text-gray-800 dark:text-white">${n.message}</span>
                     </div>
-                    <div class="alert-footer">
-                        Source: ${n.source} | ${new Date(n.timestamp).toLocaleString()}
+                    <div class="text-[10px] text-gray-400 uppercase font-bold tracking-widest ml-8">
+                        Source: ${n.source} • ${new Date(n.timestamp).toLocaleString()}
                     </div>
                 </div>
             `;
         }).join('');
 
     } catch (e) {
-        container.innerHTML = '<p style="text-align:center; color:red;">Error loading notifications</p>';
+        container.innerHTML = '<p class="text-center py-10 text-red-500 font-bold">Error loading notifications. Please try again.</p>';
     }
 }
 
-// Initial fetch
 fetchNotifications();
 </script>
 

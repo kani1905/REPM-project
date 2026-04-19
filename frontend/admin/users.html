@@ -5,12 +5,12 @@
     <meta charset="UTF-8">
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="flex h-screen bg-gray-50 dark:bg-gray-900 dark:text-white overflow-hidden text-sm">
+<body class="flex h-screen bg-gray-50 dark:bg-gray-900 dark:text-white overflow-hidden text-base">
 
     <!-- ===== SIDEBAR ===== -->
-    <aside class="w-64 h-screen bg-gradient-to-b from-blue-900 via-blue-800 to-blue-700 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 text-white flex flex-col justify-between shadow-2xl flex-shrink-0 z-50">
+    <aside class="w-64 h-screen bg-blue-900 dark:bg-gray-900 text-white flex flex-col justify-between shadow-2xl flex-shrink-0 z-50">
         <div class="overflow-y-auto">
-            <div class="p-6 border-b border-blue-700/50">
+            <div class="p-6 border-b border-white/10">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 bg-yellow-400 rounded-xl flex items-center justify-center text-blue-900 font-bold text-lg shadow-lg shadow-yellow-500/20">⚡</div>
                     <div>
@@ -29,7 +29,7 @@
                 <li><a href="settings.html" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all opacity-80 hover:opacity-100 hover:bg-white/10">⚙️ <span>Settings</span></a></li>
             </ul>
         </div>
-        <div class="p-4 border-t border-blue-700/30">
+        <div class="p-4 border-t border-white/10">
             <button onclick="logout()" class="w-full bg-red-500/80 hover:bg-red-500 py-3 rounded-xl text-center font-bold transition-all shadow-lg shadow-red-900/20">🚪 Logout</button>
         </div>
     </aside>
@@ -52,14 +52,15 @@
                         <thead class="bg-gray-50 dark:bg-gray-700 text-gray-500 uppercase text-[10px] font-bold">
                             <tr>
                                 <th class="p-4">ID</th>
-                                <th class="p-4">Username</th>
-                                <th class="p-4">Email</th>
-                                <th class="p-4">Role</th>
+                                <th class="p-4">Full Name</th>
+                                <th class="p-4">Contact Details</th>
+                                <th class="p-4">Address</th>
+                                <th class="p-4">Energy Sources</th>
                                 <th class="p-4">Action</th>
                             </tr>
                         </thead>
                         <tbody id="userRows" class="divide-y dark:divide-gray-700">
-                            <tr><td colspan="5" class="p-8 text-center text-gray-400">Loading users...</td></tr>
+                            <tr><td colspan="6" class="p-8 text-center text-gray-400">Loading users...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -94,30 +95,51 @@
 const API = 'https://repm-project-production.up.railway.app';
 
 async function logout() {
-    await fetch(`${API}/logout`, { credentials: 'include', method: 'POST', credentials: 'include' });
+    await fetch(`${API}/logout`, { credentials: 'include', method: 'POST' });
     window.location.href = '../login.html';
 }
 
 async function loadUsers() {
     try {
-        const res = await fetch(`${API}/admin/users`, { credentials: 'include', credentials: 'include' });
+        const res = await fetch(`${API}/admin/users`, { credentials: 'include' });
         if (res.status === 401 || res.status === 403) { window.location.href = '../login.html'; return; }
         const users = await res.json();
         const tbody = document.getElementById('userRows');
-        if (!users || users.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="5">No users found.</td></tr>';
+        
+        // Filter to show only ROLE_USER if needed, or all.
+        // The user asked for "registered user", likely excluding ADMIN.
+        const registeredUsers = users.filter(u => u.role === 'USER');
+
+        if (!registeredUsers || registeredUsers.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" class="p-8 text-center text-gray-400">No registered users found.</td></tr>';
             return;
         }
-        tbody.innerHTML = users.map(u => `
-            <tr>
-                <td>${u.id}</td>
-                <td>${u.username}</td>
-                <td>${u.email || '-'}</td>
-                <td>${u.role}</td>
-                <td>
-                    <button class="btn-alert" onclick="sendAlert(${u.id}, '${u.username}')">⚠ Alert</button>
+
+        tbody.innerHTML = registeredUsers.map(u => {
+            const sources = (u.allowedSources || 'None').split(',').map(s => 
+                `<span class="px-2 py-1 bg-blue-100 text-blue-700 rounded text-[10px] font-bold mr-1 uppercase">${s.trim()}</span>`
+            ).join('');
+
+            return `
+            <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                <td class="p-4 text-gray-500 font-bold">#${u.id}</td>
+                <td class="p-4">
+                    <div class="font-bold text-gray-800 dark:text-white">${u.fullName || u.username}</div>
+                    <div class="text-[10px] text-gray-400">@${u.username}</div>
                 </td>
-            </tr>`).join('');
+                <td class="p-4">
+                    <div class="text-sm font-medium">${u.email}</div>
+                    <div class="text-xs text-gray-500">${u.phone || 'No Phone'}</div>
+                </td>
+                <td class="p-4 text-gray-500 text-xs italic">${u.address || 'No Address'}</td>
+                <td class="p-4">${sources}</td>
+                <td class="p-4">
+                    <button class="bg-red-50 hover:bg-red-500 hover:text-white text-red-600 border border-red-200 px-3 py-1.5 rounded-lg text-xs font-bold transition-all" onclick="sendAlert(${u.id}, '${u.username}')">
+                        ⚠ Alert
+                    </button>
+                </td>
+            </tr>`;
+        }).join('');
     } catch(e) { console.error('Error loading users:', e); }
 }
 
