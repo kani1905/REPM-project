@@ -28,39 +28,28 @@
 <body class="flex h-screen bg-gray-50 dark:bg-gray-900 dark:text-white overflow-hidden">
 
 <!-- ===== SIDEBAR ===== -->
-<aside class="w-64 h-screen bg-gradient-to-b from-blue-900 via-blue-800 to-blue-700 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 text-white flex flex-col justify-between shadow-2xl flex-shrink-0">
+<aside class="w-64 h-screen bg-gradient-to-b from-blue-900 via-blue-800 to-blue-700 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 text-white flex flex-col justify-between shadow-2xl flex-shrink-0 z-50">
     <div class="overflow-y-auto">
         <div class="p-6 border-b border-blue-700/50">
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-yellow-400 rounded-xl flex items-center justify-center text-blue-900 font-bold text-lg">⚡</div>
+                <div class="w-10 h-10 bg-yellow-400 rounded-xl flex items-center justify-center text-blue-900 font-bold text-lg shadow-lg shadow-yellow-500/20">⚡</div>
                 <div>
-                    <h1 class="text-xl font-bold">REPM</h1>
-                    <p class="text-blue-200 text-xs dark:text-gray-400">Energy Monitor</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- User info -->
-        <div class="px-4 py-4 border-b border-blue-700/30">
-            <div class="flex items-center gap-3 bg-white/10 rounded-xl p-3">
-                <img id="sidebarAvatar" src="https://ui-avatars.com/api/?name=User&background=3b82f6&color=fff" class="w-10 h-10 rounded-full border-2 border-blue-400">
-                <div>
-                    <p id="sidebarUsername" class="font-semibold text-sm">Loading...</p>
-                    <p class="text-blue-200 text-xs dark:text-gray-400">User Account</p>
+                    <h1 class="text-xl font-bold tracking-tight">REPM</h1>
+                    <p class="text-blue-200 text-[10px] uppercase tracking-widest font-bold opacity-70">Energy Monitor</p>
                 </div>
             </div>
         </div>
 
         <ul class="space-y-1 px-3 py-4">
-            <li><a href="dashboard.html" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl bg-white/20 font-semibold">🏠 <span>Dashboard</span></a></li>
-            <li><a href="input.html" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/10">➕ <span>Add Data</span></a></li>
-            <li><a href="analytics.html" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/10">📊 <span>Analytics</span></a></li>
-            <li><a href="notifications.html" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/10">🔔 <span>Notifications</span> <span id="notifBadge" class="hidden ml-auto bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">!</span></a></li>
-            <li><a href="settings.html" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/10">⚙️ <span>Settings</span></a></li>
+            <li><a href="dashboard.html" class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl bg-white/20 font-bold shadow-inner">🏠 <span>Dashboard</span></a></li>
+            <li><a href="input.html" class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/10 transition-all opacity-80 hover:opacity-100">➕ <span>Add Data</span></a></li>
+            <li><a href="analytics.html" class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/10 transition-all opacity-80 hover:opacity-100">📊 <span>Analytics</span></a></li>
+            <li><a href="notifications.html" class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/10 transition-all opacity-80 hover:opacity-100 relative">🔔 <span>Notifications</span> <span id="notifBadge" class="hidden ml-auto bg-red-500 text-white text-[10px] rounded-full w-5 h-5 flex items-center justify-center border-2 border-blue-800">!</span></a></li>
+            <li><a href="settings.html" class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/10 transition-all opacity-80 hover:opacity-100">⚙️ <span>Settings</span></a></li>
         </ul>
     </div>
-    <div class="p-4">
-        <button onclick="logout()" class="w-full bg-red-500/80 hover:bg-red-500 py-3 rounded-xl text-center font-semibold transition-all">🚪 Logout</button>
+    <div class="p-4 border-t border-blue-700/30">
+        <button onclick="logout()" class="w-full bg-red-500/80 hover:bg-red-500 py-3 rounded-xl text-center font-bold transition-all shadow-lg shadow-red-900/20">🚪 Logout</button>
     </div>
 </aside>
 
@@ -77,6 +66,23 @@ Welcome back, <span id="headerUsername" class="text-blue-600">User</span> 👋
 </div>
 
 <div class="flex items-center gap-4">
+
+<div class="flex items-center gap-2 bg-gray-100 dark:bg-gray-700 p-1 rounded-xl">
+    <select id="reportSource" class="bg-transparent border-none text-xs font-bold text-gray-600 dark:text-gray-300 focus:ring-0 cursor-pointer">
+        <option value="All">All Sources</option>
+        <option value="Solar">Solar</option>
+        <option value="Wind">Wind</option>
+        <option value="Hydro">Hydro</option>
+    </select>
+    <select id="reportRange" class="bg-transparent border-none text-xs font-bold text-gray-600 dark:text-gray-300 focus:ring-0 cursor-pointer">
+        <option value="today">Today's Audit</option>
+        <option value="weekly">Weekly Report</option>
+        <option value="monthly">Monthly Report</option>
+    </select>
+    <button onclick="downloadReport()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold shadow-lg shadow-indigo-500/20">
+        📥 Export PDF
+    </button>
+</div>
 
 <a href="input.html"
 class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl font-semibold text-sm flex items-center gap-2">
@@ -179,6 +185,30 @@ document.getElementById("dropdownMenu")?.classList.add("hidden");
 async function logout() {
 await fetch(`${API}/logout`, { method: 'POST', credentials: 'include' });
 window.location.href = '../login.html';
+}
+
+async function downloadReport() {
+const range = document.getElementById('reportRange').value;
+const source = document.getElementById('reportSource').value;
+try {
+const res = await fetch(`${API}/user/report/download?range=${range}&source=${source}`, { credentials: 'include' });
+if (res.status === 401) {
+window.location.href = '../login.html';
+return;
+}
+const blob = await res.blob();
+const url = window.URL.createObjectURL(blob);
+const a = document.createElement('a');
+a.href = url;
+const reportTitle = range + (source !== "All" ? "_" + source : "");
+a.download = `${reportTitle}_performance_report.pdf`;
+document.body.appendChild(a);
+a.click();
+a.remove();
+} catch (e) {
+console.error('Download error', e);
+alert('Failed to download report');
+}
 }
 
 function setTodayDate() {

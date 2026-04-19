@@ -3,7 +3,12 @@ package com.repm.backend.controller;
 import com.repm.backend.repository.UserRepository;
 import com.repm.backend.service.AdminService;
 import com.repm.backend.service.NotificationService;
+import com.repm.backend.service.PdfReportService;
 import com.repm.backend.entity.User;
+import com.repm.backend.entity.EnergyData;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import java.util.List;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,13 +25,16 @@ public class AdminController {
     private final AdminService adminService;
     private final NotificationService notificationService;
     private final UserRepository userRepository;
+    private final PdfReportService pdfReportService;
 
     public AdminController(AdminService adminService,
                            NotificationService notificationService,
-                           UserRepository userRepository) {
+                           UserRepository userRepository,
+                           PdfReportService pdfReportService) {
         this.adminService = adminService;
         this.notificationService = notificationService;
         this.userRepository = userRepository;
+        this.pdfReportService = pdfReportService;
     }
 
     // ================= DASHBOARD =================
@@ -136,5 +144,39 @@ public class AdminController {
             return ResponseEntity.status(401).body(Map.of("error", "Unauthorized"));
         }
         return ResponseEntity.ok(Map.of("username", principal.getName()));
+    }
+
+    // ================= EXPORT =================
+    @GetMapping("/report/download")
+    public ResponseEntity<byte[]> downloadAdminReport(@RequestParam(defaultValue = "All Time") String range,
+                                                      @RequestParam(required = false) String source) {
+        List<User> users = userRepository.findAll();
+        List<EnergyData> allData = adminService.getAllEnergyData();
+
+        java.time.LocalDate now = java.time.LocalDate.now();
+        if ("today".equalsIgnoreCase(range)) {
+            allData = allData.stream().filter(d -> d.getEntryDate() != null && d.getEntryDate().isEqual(now)).toList();
+        } else if ("weekly".equalsIgnoreCase(range)) {
+            allData = allData.stream().filter(d -> d.getEntryDate() != null && !d.getEntryDate().isBefore(now.minusDays(7))).toList();
+        } else if ("monthly".equalsIgnoreCase(range)) {
+            allData = allData.stream().filter(d -> d.getEntryDate() != null && !d.getEntryDate().isBefore(now.minusDays(30))).toList();
+        }
+
+        if (source != null && !source.isEmpty() && !source.equalsIgnoreCase("All")) {
+            allData = allData.stream().filter(d -> source.equalsIgnoreCase(d.getSource())).toList();
+        }
+
+        String reportTitle = range + (source != null && !source.equalsIgnoreCase("All") ? " (" + source + ")" : "");
+        java.io.ByteArrayInputStream bis = pdfReportService.generateAdminReport(users, allData, reportTitle);
+        byte[] pdfBytes = bis.readAllBytes();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Content-Disposition", "inline; filename=admin_" + reportTitle.replaceAll("\\s+", "_") + "_report.pdf");
+
+        return ResponseEntity
+                .ok()
+                .headers(headers)
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(pdfBytes);
     }
 }

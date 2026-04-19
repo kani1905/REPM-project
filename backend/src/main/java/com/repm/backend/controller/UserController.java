@@ -7,6 +7,9 @@ import com.repm.backend.entity.UserSource;
 import com.repm.backend.repository.UserRepository;
 import com.repm.backend.repository.UserSourceRepository;
 import com.repm.backend.service.NotificationService;
+import com.repm.backend.service.PdfReportService;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -28,15 +31,18 @@ public class UserController {
     private final NotificationService notificationService;
     private final UserRepository userRepository;
     private final UserSourceRepository userSourceRepository;
+    private final PdfReportService pdfReportService;
 
     public UserController(UserService userService,
                           NotificationService notificationService,
                           UserRepository userRepository,
-                          UserSourceRepository userSourceRepository) {
+                          UserSourceRepository userSourceRepository,
+                          PdfReportService pdfReportService) {
         this.userService = userService;
         this.notificationService = notificationService;
         this.userRepository = userRepository;
         this.userSourceRepository = userSourceRepository;
+        this.pdfReportService = pdfReportService;
     }
 
     private List<String> getAllowedSourcesFromDB(User user) {
@@ -230,5 +236,41 @@ public ResponseEntity<?> submitInput(@RequestBody Map<String, Object> payload,
         data.put("monthly", userService.getMonthlyData(username));
 
         return ResponseEntity.ok(data);
+    }
+
+    // ================= EXPORT =================
+    @GetMapping("/report/download")
+    public ResponseEntity<byte[]> downloadReport(@RequestParam(defaultValue = "today") String range,
+                                                 @RequestParam(required = false) String source,
+                                                 Principal principal) {
+        String username = principal.getName();
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        List<EnergyData> targetData;
+        if (range.equalsIgnoreCase("weekly")) {
+            targetData = userService.getWeeklyData(username);
+        } else if (range.equalsIgnoreCase("monthly")) {
+            targetData = userService.getMonthlyData(username);
+        } else {
+            targetData = userService.getTodayDataList(username);
+        }
+
+        if (source != null && !source.isEmpty() && !source.equalsIgnoreCase("All")) {
+            targetData = targetData.stream().filter(d -> source.equalsIgnoreCase(d.getSource())).toList();
+        }
+
+        String reportTitle = range + (source != null && !source.equalsIgnoreCase("All") ? " (" + source + ")" : "");
+        java.io.ByteArrayInputStream bis = pdfReportService.generateUserReport(user, targetData, reportTitle.toUpperCase());
+        byte[] pdfBytes = bis.readAllBytes();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Content-Disposition", "inline; filename=" + reportTitle.replaceAll("\\s+", "_") + "_performance_report.pdf");
+
+        return ResponseEntity
+                .ok()
+                .headers(headers)
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(pdfBytes);
     }
 }

@@ -1,12 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <title>Register - REPM</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
         body {
             font-family: 'Inter', Arial, sans-serif;
             background-color: #d6f0f5;
@@ -16,13 +22,15 @@
             padding: 30px 16px;
             min-height: 100vh;
         }
+
         .card {
             background: #ffffff;
             padding: 44px 44px;
             border-radius: 18px;
             width: 460px;
-            box-shadow: 0 8px 40px rgba(0,0,0,0.10);
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.10);
         }
+
         h2 {
             text-align: center;
             color: #1e3c72;
@@ -30,12 +38,14 @@
             font-weight: 700;
             margin-bottom: 6px;
         }
+
         .subtitle {
             text-align: center;
             color: #6b7280;
             font-size: 13px;
             margin-bottom: 28px;
         }
+
         label {
             display: block;
             font-size: 13px;
@@ -44,8 +54,15 @@
             margin-bottom: 5px;
             margin-top: 14px;
         }
-        label:first-of-type { margin-top: 0; }
-        .req { color: #ef4444; }
+
+        label:first-of-type {
+            margin-top: 0;
+        }
+
+        .req {
+            color: #ef4444;
+        }
+
         .field {
             width: 100%;
             padding: 13px 16px;
@@ -57,29 +74,82 @@
             transition: border-color 0.2s;
             background: #fff;
         }
-        .field:focus { outline: none; border-color: #1e3c72; box-shadow: 0 0 0 3px rgba(30,60,114,0.08); }
-        .field::placeholder { color: #a0aab4; }
-        .pass-wrapper { position: relative; }
-        .pass-wrapper .field { padding-right: 44px; }
+
+        .field:focus {
+            outline: none;
+            border-color: #1e3c72;
+            box-shadow: 0 0 0 3px rgba(30, 60, 114, 0.08);
+        }
+
+        .field::placeholder {
+            color: #a0aab4;
+        }
+
+        .pass-wrapper {
+            position: relative;
+        }
+
+        .pass-wrapper .field {
+            padding-right: 44px;
+        }
+
         .eye {
-            position: absolute; right: 14px; top: 50%;
+            position: absolute;
+            right: 14px;
+            top: 50%;
             transform: translateY(-50%);
-            cursor: pointer; font-size: 17px; color: #8a9ab5;
+            cursor: pointer;
+            font-size: 17px;
+            color: #8a9ab5;
         }
+
         /* Source checkboxes */
-        .source-grid { display: flex; gap:10px; margin-top:6px; }
-        .src-label {
-            flex:1; border:1.5px solid #d0d7de; border-radius:10px;
-            padding:12px 8px; text-align:center; cursor:pointer;
-            transition: all 0.2s; font-size:13px; font-weight:600; color:#374151;
-            user-select:none;
+        .source-grid {
+            display: flex;
+            gap: 10px;
+            margin-top: 6px;
         }
-        .src-label:hover { border-color:#1e3c72; background:#f0f4ff; }
-        .src-label input { display:none; }
-        .src-label.checked { border-color:#1e3c72; background:#1e3c72; color:white; }
+
+        .src-label {
+            flex: 1;
+            border: 1.5px solid #d0d7de;
+            border-radius: 10px;
+            padding: 12px 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 13px;
+            font-weight: 600;
+            color: #374151;
+            user-select: none;
+        }
+
+        .src-label:hover {
+            border-color: #1e3c72;
+            background: #f0f4ff;
+        }
+
+        .src-label input {
+            display: none;
+        }
+
+        .src-label.checked {
+            border-color: #1e3c72;
+            background: #1e3c72;
+            color: white;
+        }
+
         /* Two-column grid */
-        .two-col { display:grid; grid-template-columns:1fr 1fr; gap:0 16px; }
-        .two-col label { margin-top: 14px; }
+        .two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0 16px;
+        }
+
+        .two-col label {
+            margin-top: 14px;
+        }
+
         .btn {
             width: 100%;
             padding: 15px;
@@ -94,182 +164,229 @@
             transition: background 0.2s, transform 0.1s;
             margin-top: 24px;
         }
-        .btn:hover { background: #163061; transform: translateY(-1px); }
-        .links { text-align: center; margin-top: 18px; }
-        .links a { color:#1e3c72; text-decoration:none; font-size:14px; font-weight:500; }
-        .links a:hover { text-decoration:underline; }
-        .msg {
-            padding: 11px 14px; border-radius: 8px;
-            font-size: 14px; text-align: center;
-            margin-bottom: 14px; display: none; font-weight: 500;
+
+        .btn:hover {
+            background: #163061;
+            transform: translateY(-1px);
         }
-        .msg.error { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
-        .msg.success { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
-        .divider { border:none; border-top:1px solid #e5e7eb; margin:20px 0; }
-        .section-title { font-size:12px; font-weight:700; text-transform:uppercase; color:#6b7280; letter-spacing:0.6px; margin-bottom:4px; }
+
+        .links {
+            text-align: center;
+            margin-top: 18px;
+        }
+
+        .links a {
+            color: #1e3c72;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .links a:hover {
+            text-decoration: underline;
+        }
+
+        .msg {
+            padding: 11px 14px;
+            border-radius: 8px;
+            font-size: 14px;
+            text-align: center;
+            margin-bottom: 14px;
+            display: none;
+            font-weight: 500;
+        }
+
+        .msg.error {
+            background: #fef2f2;
+            color: #dc2626;
+            border: 1px solid #fecaca;
+        }
+
+        .msg.success {
+            background: #f0fdf4;
+            color: #16a34a;
+            border: 1px solid #bbf7d0;
+        }
+
+        .divider {
+            border: none;
+            border-top: 1px solid #e5e7eb;
+            margin: 20px 0;
+        }
+
+        .section-title {
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #6b7280;
+            letter-spacing: 0.6px;
+            margin-bottom: 4px;
+        }
     </style>
 </head>
+
 <body>
 
-<div class="card">
-    <h2>Create Account</h2>
-    <p class="subtitle">Join REPM to monitor your renewable energy</p>
+    <div class="card">
+        <h2>Create Account</h2>
+        <p class="subtitle">Join REPM to monitor your renewable energy</p>
 
-    <div id="msgBox" class="msg"></div>
+        <div id="msgBox" class="msg"></div>
 
-    <form id="registerForm">
+        <form id="registerForm">
 
-        <!-- REQUIRED FIELDS -->
-        <p class="section-title">Required Information</p>
+            <!-- REQUIRED FIELDS -->
+            <p class="section-title">Required Information</p>
 
-        <label>Username <span class="req">*</span></label>
-        <input class="field" type="text" id="username" placeholder="Only letters and numbers" required>
+            <label>Username <span class="req">*</span></label>
+            <input class="field" type="text" id="username" placeholder="Only letters and numbers" required>
 
-        <div class="two-col">
-            <div>
-                <label>Full Name <span class="req">*</span></label>
-                <input class="field" type="text" id="fullName" placeholder="Your full name" required>
+            <div class="two-col">
+                <div>
+                    <label>Full Name <span class="req">*</span></label>
+                    <input class="field" type="text" id="fullName" placeholder="Your full name" required>
+                </div>
+                <div>
+                    <label>Email <span class="req">*</span></label>
+                    <input class="field" type="email" id="email" placeholder="you@example.com" required>
+                </div>
             </div>
-            <div>
-                <label>Email <span class="req">*</span></label>
-                <input class="field" type="email" id="email" placeholder="you@example.com" required>
+
+            <label>Password <span class="req">*</span></label>
+            <div class="pass-wrapper">
+                <input class="field" type="password" id="password" placeholder="Min. 6 characters" required>
+                <span class="eye" onclick="togglePass()">👁</span>
             </div>
+
+            <!-- ENERGY SOURCES -->
+            <label>Energy Sources <span class="req">*</span></label>
+            <div class="source-grid">
+                <label class="src-label" id="src-Solar">
+                    <input type="checkbox" value="Solar"> ☀️<br>Solar
+                </label>
+                <label class="src-label" id="src-Wind">
+                    <input type="checkbox" value="Wind"> 💨<br>Wind
+                </label>
+                <label class="src-label" id="src-Hydro">
+                    <input type="checkbox" value="Hydro"> 💧<br>Hydro
+                </label>
+            </div>
+
+            <hr class="divider">
+
+            <!-- OPTIONAL FIELDS -->
+            <p class="section-title">Optional Information</p>
+
+            <div class="two-col">
+                <div>
+                    <label>Phone</label>
+                    <input class="field" type="text" id="phone" placeholder="+91XXXXXXXXXX">
+                </div>
+                <div>
+                    <label>Date of Birth</label>
+                    <input class="field" type="date" id="dob">
+                </div>
+                <div>
+                    <label>Gender</label>
+                    <select class="field" id="gender">
+                        <option value="">Select</option>
+                        <option value="MALE">Male</option>
+                        <option value="FEMALE">Female</option>
+                        <option value="OTHER">Other</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Address</label>
+                    <input class="field" type="text" id="address" placeholder="City, Country">
+                </div>
+            </div>
+
+            <button class="btn" type="submit" id="regBtn">Create Account</button>
+        </form>
+
+        <div class="links">
+            <a href="login.html">Already have an account? Login</a>
         </div>
-
-        <label>Password <span class="req">*</span></label>
-        <div class="pass-wrapper">
-            <input class="field" type="password" id="password" placeholder="Min. 6 characters" required>
-            <span class="eye" onclick="togglePass()">👁</span>
-        </div>
-
-        <!-- ENERGY SOURCES -->
-        <label>Energy Sources <span class="req">*</span></label>
-        <div class="source-grid">
-            <label class="src-label" id="src-Solar">
-                <input type="checkbox" value="Solar"> ☀️<br>Solar
-            </label>
-            <label class="src-label" id="src-Wind">
-                <input type="checkbox" value="Wind"> 💨<br>Wind
-            </label>
-            <label class="src-label" id="src-Hydro">
-                <input type="checkbox" value="Hydro"> 💧<br>Hydro
-            </label>
-        </div>
-
-        <hr class="divider">
-
-        <!-- OPTIONAL FIELDS -->
-        <p class="section-title">Optional Information</p>
-
-        <div class="two-col">
-            <div>
-                <label>Phone</label>
-                <input class="field" type="text" id="phone" placeholder="+91XXXXXXXXXX">
-            </div>
-            <div>
-                <label>Date of Birth</label>
-                <input class="field" type="date" id="dob">
-            </div>
-            <div>
-                <label>Gender</label>
-                <select class="field" id="gender">
-                    <option value="">Select</option>
-                    <option value="MALE">Male</option>
-                    <option value="FEMALE">Female</option>
-                    <option value="OTHER">Other</option>
-                </select>
-            </div>
-            <div>
-                <label>Address</label>
-                <input class="field" type="text" id="address" placeholder="City, Country">
-            </div>
-        </div>
-
-        <button class="btn" type="submit" id="regBtn">Create Account</button>
-    </form>
-
-    <div class="links">
-        <a href="login.html">Already have an account? Login</a>
     </div>
-</div>
 
-<script>
-function togglePass() {
-    const p = document.getElementById('password');
-    p.type = p.type === 'password' ? 'text' : 'password';
-}
-
-// Source card toggle
-document.querySelectorAll('.src-label').forEach(label => {
-    label.addEventListener('click', function() {
-        const cb = this.querySelector('input');
-        cb.checked = !cb.checked;
-        this.classList.toggle('checked', cb.checked);
-    });
-});
-
-function showMsg(text, type) {
-    const box = document.getElementById('msgBox');
-    box.textContent = text;
-    box.className = 'msg ' + type;
-    box.style.display = 'block';
-}
-
-document.getElementById('registerForm').addEventListener('submit', async function(e) {
-    e.preventDefault();
-
-    const username = document.getElementById('username').value.trim();
-    const password = document.getElementById('password').value;
-    const fullName = document.getElementById('fullName').value.trim();
-    const email    = document.getElementById('email').value.trim();
-    const phone    = document.getElementById('phone').value.trim();
-    const dob      = document.getElementById('dob').value;
-    const address  = document.getElementById('address').value.trim();
-    const gender   = document.getElementById('gender').value;
-
-    // Validation
-    if (!/^[A-Za-z0-9]+$/.test(username)) {
-        showMsg('Username must contain only letters and numbers.', 'error'); return;
-    }
-    if (password.length < 6) {
-        showMsg('Password must be at least 6 characters.', 'error'); return;
-    }
-    if (phone && !/^(\+?\d{7,15})$/.test(phone)) {
-        showMsg('Invalid phone number.', 'error'); return;
-    }
-    const selected = Array.from(document.querySelectorAll('.source-grid input:checked')).map(i => i.value);
-    if (selected.length === 0) {
-        showMsg('Please select at least one energy source.', 'error'); return;
-    }
-
-    const btn = document.getElementById('regBtn');
-    btn.textContent = 'Creating account...';
-    btn.disabled = true;
-
-    const payload = { username, password, fullName, email, phone, dob: dob||null, address, gender: gender||null, sources: selected };
-
-    try {
-        const res = await fetch('/api/auth/register', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        });
-        const data = await res.json();
-        if (res.ok) {
-            showMsg('✅ Account created! Redirecting to login...', 'success');
-            setTimeout(() => window.location.href = 'login.html', 1500);
-        } else {
-            showMsg(data.message || 'Registration failed', 'error');
-            btn.textContent = 'Create Account';
-            btn.disabled = false;
+    <script>
+        function togglePass() {
+            const p = document.getElementById('password');
+            p.type = p.type === 'password' ? 'text' : 'password';
         }
-    } catch (error) {
-        showMsg('Cannot connect to server. Make sure backend is running.', 'error');
-        btn.textContent = 'Create Account';
-        btn.disabled = false;
-    }
-});
-</script>
+
+        // Source card toggle
+        document.querySelectorAll('.src-label').forEach(label => {
+            label.addEventListener('click', function () {
+                const cb = this.querySelector('input');
+                cb.checked = !cb.checked;
+                this.classList.toggle('checked', cb.checked);
+            });
+        });
+
+        function showMsg(text, type) {
+            const box = document.getElementById('msgBox');
+            box.textContent = text;
+            box.className = 'msg ' + type;
+            box.style.display = 'block';
+        }
+
+        document.getElementById('registerForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            const fullName = document.getElementById('fullName').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const dob = document.getElementById('dob').value;
+            const address = document.getElementById('address').value.trim();
+            const gender = document.getElementById('gender').value;
+
+            // Validation
+            if (!/^[A-Za-z0-9]+$/.test(username)) {
+                showMsg('Username must contain only letters and numbers.', 'error'); return;
+            }
+            if (password.length < 6) {
+                showMsg('Password must be at least 6 characters.', 'error'); return;
+            }
+            if (phone && !/^(\+?\d{7,15})$/.test(phone)) {
+                showMsg('Invalid phone number.', 'error'); return;
+            }
+            const selected = Array.from(document.querySelectorAll('.source-grid input:checked')).map(i => i.value);
+            if (selected.length === 0) {
+                showMsg('Please select at least one energy source.', 'error'); return;
+            }
+
+            const btn = document.getElementById('regBtn');
+            btn.textContent = 'Creating account...';
+            btn.disabled = true;
+
+            const payload = { username, password, fullName, email, phone, dob: dob || null, address, gender: gender || null, sources: selected };
+
+            try {
+                const res = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    showMsg('✅ Account created! Redirecting to login...', 'success');
+                    setTimeout(() => window.location.href = 'login.html', 1500);
+                } else {
+                    showMsg(data.message || 'Registration failed', 'error');
+                    btn.textContent = 'Create Account';
+                    btn.disabled = false;
+                }
+            } catch (error) {
+                showMsg('Cannot connect to server. Make sure backend is running.', 'error');
+                btn.textContent = 'Create Account';
+                btn.disabled = false;
+            }
+        });
+    </script>
 
 </body>
+
 </html>

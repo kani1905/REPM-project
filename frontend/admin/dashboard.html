@@ -32,8 +32,27 @@
 </div>
 
 <div class="main">
-    <h2>Admin Dashboard</h2>
-    <p>Welcome, <b id="adminName">Admin</b>!</p>
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+            <h2 style="margin-bottom: 5px;">Admin Dashboard</h2>
+            <p style="margin-top: 0;">Welcome, <b id="adminName">Admin</b>!</p>
+        </div>
+        <div style="display: flex; gap: 10px; align-items: center;">
+            <select id="reportSource" style="padding: 8px; border-radius: 6px; border: 1px solid #ccc;">
+                <option value="All">All Sources</option>
+                <option value="Solar">Solar</option>
+                <option value="Wind">Wind</option>
+                <option value="Hydro">Hydro</option>
+            </select>
+            <select id="reportRange" style="padding: 8px; border-radius: 6px; border: 1px solid #ccc;">
+                <option value="All Time">All Time</option>
+                <option value="today">Today</option>
+                <option value="weekly">Weekly</option>
+                <option value="monthly">Monthly</option>
+            </select>
+            <button onclick="downloadReport()" style="padding: 8px 15px; background: #1e3c72; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">📥 Export PDF</button>
+        </div>
+    </div>
 
     <h3>📊 Overall Statistics</h3>
     <div class="grid4">
@@ -71,6 +90,30 @@ const API = 'http://localhost:8080';
 async function logout() {
     await fetch(`${API}/logout`, { method: 'POST', credentials: 'include' });
     window.location.href = '../login.html';
+}
+
+async function downloadReport() {
+    const range = document.getElementById('reportRange').value;
+    const source = document.getElementById('reportSource').value;
+    try {
+        const res = await fetch(`${API}/admin/report/download?range=${range}&source=${source}`, { credentials: 'include' });
+        if (res.status === 401 || res.status === 403) {
+            window.location.href = '../login.html';
+            return;
+        }
+        const blob = await res.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        const reportTitle = (range.replace(" ", "_")) + (source !== "All" ? "_" + source : "");
+        a.download = `admin_${reportTitle}_report.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+    } catch (e) {
+        console.error('Download error:', e);
+        alert('Failed to download report');
+    }
 }
 
 async function loadDashboard() {
