@@ -51,7 +51,7 @@
 <div class="sidebar">
     <div style="padding: 10px 25px; font-size: 22px; font-weight: bold; color: var(--primary);">⚡ REPM Mail</div>
     <div style="margin-bottom: 20px;"></div>
-    <button class="btn btn-primary" style="margin: 0 20px 20px; border-radius: 12px; padding: 15px;" onclick="openCompose()">✏ Compose</button>
+
     <div class="sidebar-item active" onclick="loadTab('INBOX', this)">📥 Inbox</div>
     <div class="sidebar-item" onclick="loadTab('SENT', this)">📤 Sent Messages</div>
     <div class="sidebar-item" onclick="loadTab('ALERTS', this)">⚡ System Alerts</div>
@@ -101,28 +101,6 @@
             <textarea id="replyText" placeholder="Click here to reply to Admin..."></textarea>
             <div style="display:flex; justify-content: flex-end; margin-top: 10px;">
                 <button class="btn btn-primary" onclick="sendReply()">Send Reply</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Compose Modal -->
-<div id="composeModal" style="display:none; position:fixed; z-index:100; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.5);">
-    <div style="background:#fff; margin: 10% auto; width: 500px; border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.2);">
-        <div style="padding: 15px 20px; background: #f2f6fc; border-radius: 8px 8px 0 0; display: flex; justify-content: space-between; align-items: center;">
-            <b>New Message to Admin</b>
-            <span style="cursor:pointer;" onclick="closeCompose()">✖</span>
-        </div>
-        <div style="padding: 20px; display: flex; flex-direction: column; gap: 15px;">
-            <select id="compSource" style="padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
-                <option value="Solar">Solar</option>
-                <option value="Wind">Wind</option>
-                <option value="Hydro">Hydro</option>
-                <option value="General">General Inquiry</option>
-            </select>
-            <textarea id="compMessage" placeholder="Type your message to admin here..." style="min-height: 150px; padding: 10px; border: 1px solid #ddd; border-radius: 4px;"></textarea>
-            <div style="display:flex; justify-content: flex-end;">
-                <button class="btn btn-primary" onclick="sendMessage()">Send to Admin</button>
             </div>
         </div>
     </div>
@@ -219,33 +197,6 @@ function viewMessage(id) {
 function showList() {
     document.getElementById('listView').style.display = 'block';
     document.getElementById('detailView').style.display = 'none';
-}
-
-function openCompose() {
-    document.getElementById('composeModal').style.display = 'block';
-}
-
-function closeCompose() {
-    document.getElementById('composeModal').style.display = 'none';
-}
-
-async function sendMessage() {
-    const message = document.getElementById('compMessage').value;
-    const source = document.getElementById('compSource').value;
-    if (!message) return alert('Please type a message');
-    
-    try {
-        await fetch(`${API}/user/notifications/send`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-            body: JSON.stringify({ message, source })
-        });
-        document.getElementById('compMessage').value = '';
-        closeCompose();
-        alert('Message sent to Admin!');
-        loadTab('SENT');
-    } catch(e) { alert('Error sending message'); }
 }
 
 async function sendReply() {
