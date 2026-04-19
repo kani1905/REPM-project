@@ -1,0 +1,6 @@
+267015c Standardized professional UI layout
+1bb5df9 Fixed database constraints for admin creation
+84975e5 Fixed Railway Port Crash
+925b508 Updated frontend to use Railway
+da1ec5e Updated database for railway deployment
+11ff946 first commit

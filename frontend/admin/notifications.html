@@ -57,7 +57,7 @@
 const API = 'https://repm-project-production.up.railway.app';
 
 async function logout() {
-    await fetch(`${API}/logout`, { method: 'POST', credentials: 'include' });
+    await fetch(`${API}/logout`, { credentials: 'include', method: 'POST', credentials: 'include' });
     window.location.href = '../login.html';
 }
 
@@ -67,7 +67,7 @@ async function sendNotif() {
     const source = document.getElementById('source').value;
     if (!userId || !message) { alert('Please fill required fields'); return; }
     try {
-        const res = await fetch(`${API}/admin/notify`, {
+        const res = await fetch(`${API}/admin/notify`, { credentials: 'include',
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include',

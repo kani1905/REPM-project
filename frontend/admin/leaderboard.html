@@ -54,7 +54,7 @@
 const API = 'https://repm-project-production.up.railway.app';
 
 async function logout() {
-    await fetch(`${API}/logout`, { method: 'POST', credentials: 'include' });
+    await fetch(`${API}/logout`, { credentials: 'include', method: 'POST', credentials: 'include' });
     window.location.href = '../login.html';
 }
 
@@ -66,7 +66,7 @@ function renderLeaders(list, elementId) {
 
 async function loadLeaderboard() {
     try {
-        const res = await fetch(`${API}/admin/leaderboard`, { credentials: 'include' });
+        const res = await fetch(`${API}/admin/leaderboard`, { credentials: 'include', credentials: 'include' });
         if (res.status === 401 || res.status === 403) { window.location.href = '../login.html'; return; }
         const d = await res.json();
         renderLeaders(d.solarLeaders, 'solarList');

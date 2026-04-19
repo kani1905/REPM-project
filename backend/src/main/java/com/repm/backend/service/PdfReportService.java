@@ -18,7 +18,7 @@ import java.util.List;
 @Service
 public class PdfReportService {
 
-    private static final String LOGO_PATH = "C:\\Users\\kanik\\.gemini\\antigravity\\brain\\cdb5cb09-eb80-469d-be5d-7a1b4cda7900\\repm_logo_professional_1775274721949.png";
+    // private static final String LOGO_PATH = "C:\\Users\\kanik\\.gemini\\antigravity\\brain\\cdb5cb09-eb80-469d-be5d-7a1b4cda7900\\repm_logo_professional_1775274721949.png";
 
     public ByteArrayInputStream generateUserReport(User user, List<EnergyData> data, String rangeLabel) {
         Document document = new Document(PageSize.A4);
@@ -29,14 +29,15 @@ public class PdfReportService {
             document.open();
 
             // Logo and Header
+            /* 
             try {
                 com.lowagie.text.Image logo = com.lowagie.text.Image.getInstance(LOGO_PATH);
                 logo.scaleToFit(80, 80);
                 logo.setAlignment(Element.ALIGN_CENTER);
                 document.add(logo);
             } catch (Exception e) {
-                // If logo fails, just continue without it
             }
+            */
 
             // Fonts
             Font fontTitle = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 22, new Color(30, 60, 114));
@@ -63,8 +64,8 @@ public class PdfReportService {
             addInfoCell(infoTable, "User Details:", fontHeader, new Color(30, 60, 114));
             addInfoCell(infoTable, "Report Metadata:", fontHeader, new Color(30, 60, 114));
             
-            addInfoCell(infoTable, "Name: " + (user.getFullName() != null ? user.getFullName() : "User") + "\nEmail: " + (user.getEmail() != null ? user.getEmail() : "N/A"), fontNormal, Color.WHITE);
-            addInfoCell(infoTable, "Generated On: " + LocalDate.now() + "\nMetric: Energy Utilization", fontNormal, Color.WHITE);
+            addInfoCell(infoTable, "Name: " + (user.getFullName() != null ? user.getFullName() : "User") + "\nEmail: " + (user.getEmail() != null ? user.getEmail() : "N/A"), fontNormal, Color.LIGHT_GRAY);
+            addInfoCell(infoTable, "Generated On: " + LocalDate.now() + "\nMetric: Energy Utilization", fontNormal, Color.LIGHT_GRAY);
             
             document.add(infoTable);
             document.add(new Paragraph(" "));
@@ -84,10 +85,10 @@ public class PdfReportService {
             addCell(summaryTable, "CO2 Saved (kg)", fontHeader, new Color(20, 184, 166)); 
             addCell(summaryTable, "Avg Efficiency (%)", fontHeader, new Color(59, 130, 246)); 
 
-            addCell(summaryTable, String.format("%.2f", totalProduced), fontNormal, Color.WHITE);
-            addCell(summaryTable, String.format("%.2f", totalConsumed), fontNormal, Color.WHITE);
-            addCell(summaryTable, String.format("%.2f", totalCo2Saved), fontNormal, Color.WHITE);
-            addCell(summaryTable, String.format("%.2f%%", avgEff), fontNormal, Color.WHITE);
+            addCell(summaryTable, String.format("%.2f", totalProduced), fontNormal, Color.LIGHT_GRAY);
+            addCell(summaryTable, String.format("%.2f", totalConsumed), fontNormal, Color.LIGHT_GRAY);
+            addCell(summaryTable, String.format("%.2f", totalCo2Saved), fontNormal, Color.LIGHT_GRAY);
+            addCell(summaryTable, String.format("%.2f%%", avgEff), fontNormal, Color.LIGHT_GRAY);
 
             document.add(summaryTable);
             document.add(new Paragraph(" "));
@@ -110,12 +111,12 @@ public class PdfReportService {
             addCell(table, "CO2 Saved", fontHeader, Color.DARK_GRAY);
 
             for (EnergyData d : data) {
-                addCell(table, d.getEntryDate() != null ? d.getEntryDate().toString() : "N/A", fontNormal, Color.WHITE);
-                addCell(table, d.getSource() != null ? d.getSource() : "N/A", fontNormal, Color.WHITE);
-                addCell(table, String.format("%.2f", d.getEnergyProduced() != null ? d.getEnergyProduced() : 0), fontNormal, Color.WHITE);
-                addCell(table, String.format("%.2f", d.getEnergyConsumed() != null ? d.getEnergyConsumed() : 0), fontNormal, Color.WHITE);
-                addCell(table, String.format("%.1f%%", d.getEfficiency() != null ? d.getEfficiency() : 0), fontNormal, Color.WHITE);
-                addCell(table, String.format("%.2f", d.getCo2Consumed() != null ? d.getCo2Consumed() : 0), fontNormal, Color.WHITE);
+                addCell(table, d.getEntryDate() != null ? d.getEntryDate().toString() : "N/A", fontNormal, Color.LIGHT_GRAY);
+                addCell(table, d.getSource() != null ? d.getSource() : "N/A", fontNormal, Color.LIGHT_GRAY);
+                addCell(table, String.format("%.2f", d.getEnergyProduced() != null ? d.getEnergyProduced() : 0), fontNormal, Color.LIGHT_GRAY);
+                addCell(table, String.format("%.2f", d.getEnergyConsumed() != null ? d.getEnergyConsumed() : 0), fontNormal, Color.LIGHT_GRAY);
+                addCell(table, String.format("%.1f%%", d.getEfficiency() != null ? d.getEfficiency() : 0), fontNormal, Color.LIGHT_GRAY);
+                addCell(table, String.format("%.2f", d.getCo2Consumed() != null ? d.getCo2Consumed() : 0), fontNormal, Color.LIGHT_GRAY);
             }
 
             document.add(table);
@@ -144,6 +145,7 @@ public class PdfReportService {
             document.open();
 
             // Logo
+            /*
             try {
                 com.lowagie.text.Image logo = com.lowagie.text.Image.getInstance(LOGO_PATH);
                 logo.scaleToFit(80, 80);
@@ -151,6 +153,7 @@ public class PdfReportService {
                 document.add(logo);
             } catch (Exception e) {
             }
+            */
 
             Font fontTitle = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 22, new Color(30, 60, 114));
             Font fontSubtitle = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 14, Color.DARK_GRAY);
@@ -183,9 +186,9 @@ public class PdfReportService {
             addCell(adminSummary, "Total Energy Consumed (kWh)", fontHeader, new Color(30, 60, 114));
             addCell(adminSummary, "Overall Avg Efficiency (%)", fontHeader, new Color(30, 60, 114));
 
-            addCell(adminSummary, String.format("%.2f", totalProduced), fontNormal, Color.WHITE);
-            addCell(adminSummary, String.format("%.2f", totalConsumed), fontNormal, Color.WHITE);
-            addCell(adminSummary, String.format("%.2f%%", avgEff), fontNormal, Color.WHITE);
+            addCell(adminSummary, String.format("%.2f", totalProduced), fontNormal, Color.LIGHT_GRAY);
+            addCell(adminSummary, String.format("%.2f", totalConsumed), fontNormal, Color.LIGHT_GRAY);
+            addCell(adminSummary, String.format("%.2f%%", avgEff), fontNormal, Color.LIGHT_GRAY);
 
             document.add(adminSummary);
             document.add(new Paragraph(" "));
@@ -214,10 +217,10 @@ public class PdfReportService {
                 if (count == 0)
                     continue; // Only show active users in the range report
 
-                addCell(userTable, (u.getFullName() != null ? u.getFullName() : "User"), fontNormal, Color.WHITE);
-                addCell(userTable, (u.getEmail() != null ? u.getEmail() : "N/A"), fontNormal, Color.WHITE);
-                addCell(userTable, String.valueOf(count), fontNormal, Color.WHITE);
-                addCell(userTable, String.format("%.2f%%", userAvgEff), fontNormal, Color.WHITE);
+                addCell(userTable, (u.getFullName() != null ? u.getFullName() : "User"), fontNormal, Color.LIGHT_GRAY);
+                addCell(userTable, (u.getEmail() != null ? u.getEmail() : "N/A"), fontNormal, Color.LIGHT_GRAY);
+                addCell(userTable, String.valueOf(count), fontNormal, Color.LIGHT_GRAY);
+                addCell(userTable, String.format("%.2f%%", userAvgEff), fontNormal, Color.LIGHT_GRAY);
             }
 
             document.add(userTable);

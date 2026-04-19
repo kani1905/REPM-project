@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -70,13 +69,13 @@
 const API = 'https://repm-project-production.up.railway.app';
 
 async function logout() {
-    await fetch(`${API}/logout`, { method: 'POST', credentials: 'include' });
+    await fetch(`${API}/logout`, { credentials: 'include', method: 'POST', credentials: 'include' });
     window.location.href = '../login.html';
 }
 
 async function loadUsers() {
     try {
-        const res = await fetch(`${API}/admin/users`, { credentials: 'include' });
+        const res = await fetch(`${API}/admin/users`, { credentials: 'include', credentials: 'include' });
         if (res.status === 401 || res.status === 403) { window.location.href = '../login.html'; return; }
         const users = await res.json();
         const tbody = document.getElementById('userRows');
@@ -103,7 +102,7 @@ async function sendAlert(userId, username) {
     const source = prompt('Enter source (Solar/Wind/Hydro):', 'Solar');
     if (!source) return;
     try {
-        const res = await fetch(`${API}/admin/send-alert`, {
+        const res = await fetch(`${API}/admin/send-alert`, { credentials: 'include',
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include',
@@ -120,7 +119,7 @@ async function sendNotif() {
     const source = document.getElementById('notifSource').value;
     if (!userId || !message) { alert('Please fill all fields'); return; }
     try {
-        const res = await fetch(`${API}/admin/notify`, {
+        const res = await fetch(`${API}/admin/notify`, { credentials: 'include',
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include',

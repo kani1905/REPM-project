@@ -40,13 +40,13 @@
 const API = 'https://repm-project-production.up.railway.app';
 
 async function logout() {
-    await fetch(`${API}/logout`, { method: 'POST', credentials: 'include' });
+    await fetch(`${API}/logout`, { credentials: 'include', method: 'POST', credentials: 'include' });
     window.location.href = '../login.html';
 }
 
 async function loadSettings() {
     try {
-        const res = await fetch(`${API}/admin/settings`, { credentials: 'include' });
+        const res = await fetch(`${API}/admin/settings`, { credentials: 'include', credentials: 'include' });
         if (res.status === 401 || res.status === 403) { window.location.href = '../login.html'; return; }
         const data = await res.json();
         document.getElementById('adminName').textContent = data.username || 'Admin';
