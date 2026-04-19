@@ -1,148 +1,322 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <title>Admin Dashboard - REPM</title>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config = { darkMode: 'class' }</script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        if (localStorage.getItem("theme") === "dark") document.documentElement.classList.add("dark");
+        else document.documentElement.classList.remove("dark");
+    </script>
     <style>
-        body { margin:0; font-family:Arial,sans-serif; background:#e0f7fa; display:flex; }
-        .sidebar { position:fixed; top:0; left:0; width:220px; height:100%; background:#1e3c72; color:white; display:flex; flex-direction:column; padding:20px 0; box-shadow:3px 0 15px rgba(0,0,0,0.1); }
-        .sidebar a { color:white; padding:15px 25px; margin:5px 0; border-radius:6px; transition:background 0.3s; text-decoration:none; display:block; font-weight:bold; }
-        .sidebar a:hover, .sidebar a.active { background:rgba(255,255,255,0.2); }
-        .sidebar h2 { text-align:center; margin-bottom:30px; }
-        .main { margin-left:240px; padding:40px; flex:1; }
-        .box { background:white; padding:30px; border-radius:12px; margin-bottom:20px; box-shadow:0 5px 30px rgba(0,0,0,0.2); }
-        .grid3 { display:grid; grid-template-columns:repeat(3,1fr); gap:20px; }
-        .grid4 { display:grid; grid-template-columns:repeat(4,1fr); gap:20px; }
-        .stat { background:white; padding:20px; border-radius:10px; box-shadow:0 3px 15px rgba(0,0,0,0.1); text-align:center; }
-        .stat h4 { color:#555; margin:0; }
-        .stat p { font-size:24px; font-weight:bold; color:#1e3c72; margin:10px 0 0; }
-        button { cursor:pointer; }
+        body { font-family: 'Inter', sans-serif; }
+        .stat-card { transition: all 0.3s ease; }
+        .stat-card:hover { transform: translateY(-4px); box-shadow: 0 20px 40px rgba(0,0,0,0.15); }
+        .source-card { transition: all 0.3s ease; }
+        .source-card:hover { transform: translateY(-2px); }
+        .progress-bar { transition: width 1s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .fade-in { animation: fadeIn 0.5s ease forwards; }
+        .sidebar-link { transition: all 0.2s ease; }
     </style>
 </head>
-<body>
-<div class="sidebar">
-    <h2>⚡ REPM</h2>
-    <a href="dashboard.html" class="active">🏠 Dashboard</a>
-    <a href="analytics.html">📊 Analytics</a>
-    <a href="users.html">👥 Users</a>
-    <a href="leaderboard.html">🏆 Leaderboard</a>
-    <a href="notifications.html">🔔 Notifications</a>
-    <a href="settings.html">⚙ Settings</a>
-    <a href="#" onclick="logout()" style="margin-top:auto; background:#ef4444;">🚪 Logout</a>
+
+<body class="flex h-screen bg-gray-50 dark:bg-gray-900 dark:text-white overflow-hidden">
+
+<!-- ===== SIDEBAR ===== -->
+<aside class="w-64 h-screen bg-gradient-to-b from-blue-900 via-blue-800 to-blue-700 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 text-white flex flex-col justify-between shadow-2xl flex-shrink-0 z-50">
+    <div class="overflow-y-auto">
+        <div class="p-6 border-b border-blue-700/50">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-yellow-400 rounded-xl flex items-center justify-center text-blue-900 font-bold text-lg shadow-lg shadow-yellow-500/20">⚡</div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-tight">REPM</h1>
+                    <p class="text-blue-200 text-[10px] uppercase tracking-widest font-bold opacity-70">Energy Monitor</p>
+                </div>
+            </div>
+        </div>
+
+        <ul class="space-y-1 px-3 py-4">
+            <li><a href="dashboard.html" class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl bg-white/20 font-bold shadow-inner">🏠 <span>Dashboard</span></a></li>
+            <li><a href="users.html" class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/10 transition-all opacity-80 hover:opacity-100">👥 <span>Users</span></a></li>
+            <li><a href="analytics.html" class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/10 transition-all opacity-80 hover:opacity-100">📊 <span>Analytics</span></a></li>
+            <li><a href="leaderboard.html" class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl transition-all opacity-80 hover:opacity-100 hover:bg-white/10">🏆 <span>Leaderboard</span></a></li>
+            <li><a href="notifications.html" class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/10 transition-all opacity-80 hover:opacity-100 relative">🔔 <span>Notifications</span> <span id="notifBadge" class="hidden ml-auto bg-red-500 text-white text-[10px] rounded-full w-5 h-5 flex items-center justify-center border-2 border-blue-800">!</span></a></li>
+            <li><a href="settings.html" class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/10 transition-all opacity-80 hover:opacity-100">⚙️ <span>Settings</span></a></li>
+        </ul>
+    </div>
+    <div class="p-4 border-t border-blue-700/30">
+        <button onclick="logout()" class="w-full bg-red-500/80 hover:bg-red-500 py-3 rounded-xl text-center font-bold transition-all shadow-lg shadow-red-900/20">🚪 Logout</button>
+    </div>
+</aside>
+
+<!-- ===== MAIN CONTENT ===== -->
+<div class="flex-1 flex flex-col overflow-hidden">
+
+<!-- TOP BAR -->
+<header class="bg-white dark:bg-gray-800 border-b dark:border-gray-700 px-8 py-4 flex items-center justify-between shadow-sm flex-shrink-0">
+<div>
+<h2 class="text-2xl font-bold text-gray-800 dark:text-white">
+Welcome back, <span id="headerUsername" class="text-blue-600">Admin</span> 👋
+</h2>
+<p class="text-sm text-gray-500 dark:text-gray-400" id="todayDate"></p>
 </div>
 
-<div class="main">
-    <div style="display: flex; justify-content: space-between; align-items: center;">
-        <div>
-            <h2 style="margin-bottom: 5px;">Admin Dashboard</h2>
-            <p style="margin-top: 0;">Welcome, <b id="adminName">Admin</b>!</p>
-        </div>
-        <div style="display: flex; gap: 10px; align-items: center;">
-            <select id="reportSource" style="padding: 8px; border-radius: 6px; border: 1px solid #ccc;">
-                <option value="All">All Sources</option>
-                <option value="Solar">Solar</option>
-                <option value="Wind">Wind</option>
-                <option value="Hydro">Hydro</option>
-            </select>
-            <select id="reportRange" style="padding: 8px; border-radius: 6px; border: 1px solid #ccc;">
-                <option value="All Time">All Time</option>
-                <option value="today">Today</option>
-                <option value="weekly">Weekly</option>
-                <option value="monthly">Monthly</option>
-            </select>
-            <button onclick="downloadReport()" style="padding: 8px 15px; background: #1e3c72; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">📥 Export PDF</button>
-        </div>
-    </div>
+<div class="flex items-center gap-4">
 
-    <h3>📊 Overall Statistics</h3>
-    <div class="grid4">
-        <div class="stat"><h4>Avg Efficiency</h4><p id="avgEff">0</p></div>
-        <div class="stat"><h4>Avg CO2 Consumed</h4><p id="avgCO2c">0</p></div>
-        <div class="stat"><h4>Avg CO2 Produced</h4><p id="avgCO2p">0</p></div>
-        <div class="stat"><h4>Total Bill (₹)</h4><p id="totalBill">0</p></div>
-    </div>
+<div class="flex items-center gap-2 bg-gray-100 dark:bg-gray-700 p-1 rounded-xl">
+    <select id="reportSource" class="bg-transparent border-none text-xs font-bold text-gray-600 dark:text-gray-300 focus:ring-0 cursor-pointer">
+        <option value="All">All Sources</option>
+        <option value="Solar">Solar</option>
+        <option value="Wind">Wind</option>
+        <option value="Hydro">Hydro</option>
+    </select>
+    <select id="reportRange" class="bg-transparent border-none text-xs font-bold text-gray-600 dark:text-gray-300 focus:ring-0 cursor-pointer">
+        <option value="today">Today's Audit</option>
+        <option value="weekly">Weekly Report</option>
+        <option value="monthly">Monthly Report</option>
+    </select>
+    <button onclick="downloadReport()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold shadow-lg shadow-indigo-500/20">
+        📥 Export PDF
+    </button>
+</div>
 
-    <h3 style="margin-top:30px;">☀ Solar</h3>
-    <div class="grid3">
-        <div class="stat"><h4>Efficiency</h4><p id="solarEff">0</p></div>
-        <div class="stat"><h4>CO2</h4><p id="solarCO2">0</p></div>
-        <div class="stat"><h4>Bill (₹)</h4><p id="solarBill">0</p></div>
-    </div>
+<a href="users.html"
+class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl font-semibold text-sm flex items-center gap-2">
+➕ Add Data
+</a>
 
-    <h3 style="margin-top:30px;">💨 Wind</h3>
-    <div class="grid3">
-        <div class="stat"><h4>Efficiency</h4><p id="windEff">0</p></div>
-        <div class="stat"><h4>CO2</h4><p id="windCO2">0</p></div>
-        <div class="stat"><h4>Bill (₹)</h4><p id="windBill">0</p></div>
-    </div>
+<div class="relative">
+<img id="profileImg"
+onclick="toggleDropdown()"
+src="https://ui-avatars.com/api/?name=User&background=3b82f6&color=fff"
+class="w-10 h-10 rounded-xl cursor-pointer border-2 border-blue-500">
 
-    <h3 style="margin-top:30px;">💧 Hydro</h3>
-    <div class="grid3">
-        <div class="stat"><h4>Efficiency</h4><p id="hydroEff">0</p></div>
-        <div class="stat"><h4>CO2</h4><p id="hydroCO2">0</p></div>
-        <div class="stat"><h4>Bill (₹)</h4><p id="hydroBill">0</p></div>
-    </div>
+<div id="dropdownMenu"
+class="hidden absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-xl shadow-xl border dark:border-gray-700">
+
+<a href="settings.html"
+class="flex items-center gap-2 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-t-xl text-sm">
+👤 Profile & Settings
+</a>
+
+<button onclick="logout()"
+class="w-full flex items-center gap-2 px-4 py-3 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-b-xl text-sm text-red-600">
+🚪 Logout
+</button>
+
+</div>
+</div>
+</div>
+</header>
+
+<!-- BODY -->
+<div class="flex-1 overflow-y-auto p-8 space-y-6">
+
+<!-- ===== SUMMARY CARDS ===== -->
+<div class="grid grid-cols-2 lg:grid-cols-5 gap-4">
+
+<div class="bg-green-500 text-white p-5 rounded-2xl">
+<p class="text-xs">⚡ Avg Efficiency</p>
+<p class="text-3xl font-bold mt-2" id="totalProduced">0</p>
+<p class="text-xs"></p>
+</div>
+
+<div class="bg-red-500 text-white p-5 rounded-2xl">
+<p class="text-xs">🌫 Avg CO₂ Produced</p>
+<p class="text-3xl font-bold mt-2" id="co2Emitted">0</p>
+<p class="text-xs">kg today</p>
+</div>
+
+<div class="bg-teal-500 text-white p-5 rounded-2xl">
+<p class="text-xs">🌿 CO₂ Saved</p>
+<p class="text-3xl font-bold mt-2" id="co2Saved">0</p>
+<p class="text-xs">kg today</p>
+</div>
+
+<div class="bg-blue-500 text-white p-5 rounded-2xl">
+<p class="text-xs">🔌 Avg CO₂ Consumed</p>
+<p class="text-3xl font-bold mt-2" id="totalConsumed">0</p>
+<p class="text-xs"></p>
+</div>
+
+<div class="bg-yellow-500 text-white p-5 rounded-2xl">
+<p class="text-xs">💰 Total Bill</p>
+<p class="text-3xl font-bold mt-2">₹<span id="totalBill">0</span></p>
+</div>
+
+</div>
+
+<!-- ===== SOURCE CARDS ===== -->
+
+<div class="space-y-4">
+
+<h3 class="text-lg font-bold text-gray-800 dark:text-white">
+📡 Today by Source
+</h3>
+
+<div id="sourceCards" class="space-y-3">
+<div class="bg-white dark:bg-gray-800 rounded-xl p-4 text-center text-gray-400">
+Loading...
+</div>
+</div>
+
+</div>
+
+</div>
 </div>
 
 <script>
-const API = 'https://repm-project-production.up.railway.app';
+
+const API = '';
+
+function toggleDropdown() {
+document.getElementById("dropdownMenu").classList.toggle("hidden");
+}
+
+window.onclick = function(e) {
+if (!e.target.closest('.relative'))
+document.getElementById("dropdownMenu")?.classList.add("hidden");
+};
 
 async function logout() {
-    await fetch(`${API}/logout`, { method: 'POST', credentials: 'include' });
-    window.location.href = '../login.html';
+await fetch(`${API}/logout`, { method: 'POST', credentials: 'include' });
+window.location.href = '../login.html';
 }
 
 async function downloadReport() {
-    const range = document.getElementById('reportRange').value;
-    const source = document.getElementById('reportSource').value;
-    try {
-        const res = await fetch(`${API}/admin/report/download?range=${range}&source=${source}`, { credentials: 'include' });
-        if (res.status === 401 || res.status === 403) {
-            window.location.href = '../login.html';
-            return;
-        }
-        const blob = await res.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        const reportTitle = (range.replace(" ", "_")) + (source !== "All" ? "_" + source : "");
-        a.download = `admin_${reportTitle}_report.pdf`;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-    } catch (e) {
-        console.error('Download error:', e);
-        alert('Failed to download report');
-    }
+const range = document.getElementById('reportRange').value;
+const source = document.getElementById('reportSource').value;
+try {
+const res = await fetch(`${API}/admin/report/download?range=${range}&source=${source}`, { credentials: 'include' });
+if (res.status === 401) {
+window.location.href = '../login.html';
+return;
+}
+const blob = await res.blob();
+const url = window.URL.createObjectURL(blob);
+const a = document.createElement('a');
+a.href = url;
+const reportTitle = range + (source !== "All" ? "_" + source : "");
+a.download = `${reportTitle}_performance_report.pdf`;
+document.body.appendChild(a);
+a.click();
+a.remove();
+} catch (e) {
+console.error('Download error', e);
+alert('Failed to download report');
+}
 }
 
-async function loadDashboard() {
-    try {
-        const res = await fetch(`${API}/admin/dashboard`, { credentials: 'include' });
-        if (res.status === 401 || res.status === 403) { window.location.href = '../login.html'; return; }
-        const d = await res.json();
-
-        document.getElementById('adminName').textContent = d.username || 'Admin';
-        document.getElementById('avgEff').textContent = (d.avgEfficiency || 0).toFixed(2) + '%';
-        document.getElementById('avgCO2c').textContent = (d.avgCO2Consumed || 0).toFixed(2);
-        document.getElementById('avgCO2p').textContent = (d.avgCO2Produced || 0).toFixed(2);
-        document.getElementById('totalBill').textContent = '₹' + (d.totalElectricityBill || 0).toFixed(2);
-
-        document.getElementById('solarEff').textContent = (d.solarEff || 0).toFixed(2) + '%';
-        document.getElementById('solarCO2').textContent = (d.solarCO2 || 0).toFixed(2);
-        document.getElementById('solarBill').textContent = '₹' + (d.solarBill || 0).toFixed(2);
-
-        document.getElementById('windEff').textContent = (d.windEff || 0).toFixed(2) + '%';
-        document.getElementById('windCO2').textContent = (d.windCO2 || 0).toFixed(2);
-        document.getElementById('windBill').textContent = '₹' + (d.windBill || 0).toFixed(2);
-
-        document.getElementById('hydroEff').textContent = (d.hydroEff || 0).toFixed(2) + '%';
-        document.getElementById('hydroCO2').textContent = (d.hydroCO2 || 0).toFixed(2);
-        document.getElementById('hydroBill').textContent = '₹' + (d.hydroBill || 0).toFixed(2);
-    } catch(e) { console.error('Error loading dashboard:', e); }
+function setTodayDate() {
+const now = new Date();
+document.getElementById('todayDate').textContent =
+now.toLocaleDateString('en-IN', {
+weekday:'long',
+year:'numeric',
+month:'long',
+day:'numeric'
+});
 }
 
+const sourceEmoji = {
+Solar:'☀️',
+Wind:'💨',
+Hydro:'💧'
+};
+
+function renderSourceCards(todayList){
+
+const container = document.getElementById('sourceCards');
+
+if(!todayList || todayList.length === 0){
+container.innerHTML =
+'<div class="bg-white dark:bg-gray-800 rounded-xl p-6 text-center"><p class="text-gray-400">No data for today</p></div>';
+return;
+}
+
+container.innerHTML = todayList.map(d => `
+<div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow">
+
+<div class="flex justify-between items-center mb-2">
+<h4 class="font-bold text-gray-800 dark:text-white">
+${sourceEmoji[d.source]} ${d.source}
+</h4>
+<span class="text-sm text-gray-400">
+Efficiency ${(d.efficiency||0).toFixed(1)}%
+</span>
+</div>
+
+<div class="grid grid-cols-2 gap-2 text-sm">
+
+<div>
+<p class="text-gray-400">Produced</p>
+<p class="font-semibold">${(d.energyProduced||0).toFixed(2)} kWh</p>
+</div>
+
+<div>
+<p class="text-gray-400">Consumed</p>
+<p class="font-semibold">${(d.energyConsumed||0).toFixed(2)} kWh</p>
+</div>
+
+<div>
+<p class="text-gray-400">Avg CO₂ Produced</p>
+<p class="font-semibold">${(d.co2Produced||0).toFixed(2)} kg</p>
+</div>
+
+<div>
+<p class="text-gray-400">CO₂ Saved</p>
+<p class="font-semibold">${(d.co2Consumed||0).toFixed(2)} kg</p>
+</div>
+
+</div>
+
+</div>
+`).join('');
+
+}
+
+async function loadDashboard(){
+
+try{
+
+const res = await fetch(`${API}/admin/dashboard`, { credentials:'include' });
+
+if(res.status === 401){
+window.location.href='../login.html';
+return;
+}
+
+const data = await res.json();
+
+document.getElementById('headerUsername').textContent = data.username || 'User';
+
+document.getElementById('totalProduced').textContent = (data.avgEfficiency||0).toFixed(2) + "%";
+document.getElementById('totalConsumed').textContent = (data.avgCO2Consumed||0).toFixed(2);
+document.getElementById('totalBill').textContent = (data.totalElectricityBill||0).toFixed(2);
+
+const co2Emitted = data.avgCO2Produced || 0;
+const co2Saved = data.avgCO2Consumed || 0;
+
+document.getElementById('co2Emitted').textContent = co2Emitted.toFixed(2);
+document.getElementById('co2Saved').textContent = co2Saved.toFixed(2);
+
+renderSourceCards([{source: "Solar", efficiency: data.solarEff, energyProduced: 0, energyConsumed: 0, co2Produced: data.solarCO2, co2Consumed: 0, electricityBill: data.solarBill}, {source: "Wind", efficiency: data.windEff, energyProduced: 0, energyConsumed: 0, co2Produced: data.windCO2, co2Consumed: 0, electricityBill: data.windBill}, {source: "Hydro", efficiency: data.hydroEff, energyProduced: 0, energyConsumed: 0, co2Produced: data.hydroCO2, co2Consumed: 0, electricityBill: data.hydroBill}]);
+
+}
+catch(e){
+console.error('Dashboard error',e);
+}
+
+}
+
+setTodayDate();
 loadDashboard();
+
 </script>
 </body>
 </html>

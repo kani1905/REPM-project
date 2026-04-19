@@ -185,6 +185,10 @@
 
         const API = '';
 
+        
+        function toggleDropdown() { document.getElementById("dropdownMenu").classList.toggle("hidden"); }
+        window.onclick = function(e) { if (!e.target.closest('.relative')) document.getElementById("dropdownMenu")?.classList.add("hidden"); };
+        
         async function logout() {
             await fetch(`${API}/logout`, { method: 'POST', credentials: 'include' });
             window.location.href = '../login.html';
