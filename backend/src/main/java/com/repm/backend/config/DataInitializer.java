@@ -20,11 +20,10 @@ public class DataInitializer {
                 User admin = new User();
 
                 admin.setUsername("admin");
-
                 admin.setPassword("admin123"); // NoOpPasswordEncoder allows plain text
-
+                admin.setFullName("Super Admin");
+                admin.setEmail("admin@repm.com");
                 admin.setRole(User.Role.ADMIN);
-
                 userRepository.save(admin);
 
                 System.out.println("Admin created: admin / admin123");
