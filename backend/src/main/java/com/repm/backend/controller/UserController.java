@@ -299,11 +299,25 @@ public ResponseEntity<?> submitInput(@RequestBody Map<String, Object> payload,
         
         User admin = userRepository.findByUsername("admin").orElse(null);
         if (admin == null) {
-            admin = userRepository.findAll().stream().filter(u -> u.getRole().equals("ADMIN")).findFirst().orElse(null);
+            admin = userRepository.findAll().stream().filter(u -> u.getRole() == User.Role.ADMIN).findFirst().orElse(null);
         }
         
         notificationService.createNotification(admin, message, "REPLY", "USER_TO_ADMIN", principal.getName(), parentId);
         return ResponseEntity.ok(Map.of("message", "Reply sent to Admin"));
+    }
+
+    @PostMapping("/notifications/send")
+    public ResponseEntity<?> sendMessage(@RequestBody Map<String, Object> payload, Principal principal) {
+        String message = payload.get("message").toString();
+        String source = payload.getOrDefault("source", "GENERAL").toString();
+        
+        User admin = userRepository.findByUsername("admin").orElse(null);
+        if (admin == null) {
+            admin = userRepository.findAll().stream().filter(u -> u.getRole() == User.Role.ADMIN).findFirst().orElse(null);
+        }
+        
+        notificationService.createNotification(admin, message, source, "USER_TO_ADMIN", principal.getName(), null);
+        return ResponseEntity.ok(Map.of("message", "Message sent to Admin"));
     }
 
     @PostMapping("/notifications/{id}/read")

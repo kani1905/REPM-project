@@ -203,18 +203,24 @@ public class PdfReportService {
             Font fontHeader = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 10, Color.WHITE);
             Font fontFooter = FontFactory.getFont(FontFactory.HELVETICA_OBLIQUE, 9, Color.GRAY);
 
-            Paragraph title = new Paragraph("System-Wide " + rangeLabel + " Report", fontTitle);
+            Paragraph title = new Paragraph("System-Wide " + rangeLabel + " Performance Report", fontTitle);
             title.setAlignment(Element.ALIGN_CENTER);
             document.add(title);
 
-            Paragraph subtitle = new Paragraph("Administrative Analytics Overview", fontSubtitle);
+            Paragraph subtitle = new Paragraph("Renewable Energy Administrative Insights", fontSubtitle);
             subtitle.setAlignment(Element.ALIGN_CENTER);
             document.add(subtitle);
             document.add(new Paragraph(" "));
 
-            // Metadata
-            document.add(new Paragraph("Total Registered Users: " + users.size(), fontSubtitle));
-            document.add(new Paragraph("Generation Date: " + LocalDate.now(), fontNormal));
+            // Metadata Table
+            PdfPTable metaTable = new PdfPTable(2);
+            metaTable.setWidthPercentage(100);
+            addInfoCell(metaTable, "Administrative Details", fontHeader, new Color(30, 60, 114));
+            addInfoCell(metaTable, "Generation Context", fontHeader, new Color(30, 60, 114));
+            
+            addInfoCell(metaTable, "Registered Users: " + users.size() + "\nData Points Analyzed: " + allData.size(), fontNormal, Color.LIGHT_GRAY);
+            addInfoCell(metaTable, "Generated On: " + LocalDate.now() + "\nMetric: Aggregate Efficiency", fontNormal, Color.LIGHT_GRAY);
+            document.add(metaTable);
             document.add(new Paragraph(" "));
 
             // Aggregated Summary
@@ -228,12 +234,14 @@ public class PdfReportService {
 
             PdfPTable adminSummary = new PdfPTable(3);
             adminSummary.setWidthPercentage(100);
-            addCell(adminSummary, "Total Energy Produced (kWh)", fontHeader, new Color(30, 60, 114));
-            addCell(adminSummary, "Total Energy Consumed (kWh)", fontHeader, new Color(30, 60, 114));
-            addCell(adminSummary, "Overall Avg Efficiency (%)", fontHeader, new Color(30, 60, 114));
+            adminSummary.setSpacingBefore(10f);
+            
+            addCell(adminSummary, "Total Energy Produced", fontHeader, new Color(16, 185, 129));
+            addCell(adminSummary, "Total Energy Consumed", fontHeader, new Color(239, 68, 68));
+            addCell(adminSummary, "System Efficiency", fontHeader, new Color(59, 130, 246));
 
-            addCell(adminSummary, String.format("%.2f", totalProduced), fontNormal, Color.LIGHT_GRAY);
-            addCell(adminSummary, String.format("%.2f", totalConsumed), fontNormal, Color.LIGHT_GRAY);
+            addCell(adminSummary, String.format("%.2f kWh", totalProduced), fontNormal, Color.LIGHT_GRAY);
+            addCell(adminSummary, String.format("%.2f kWh", totalConsumed), fontNormal, Color.LIGHT_GRAY);
             addCell(adminSummary, String.format("%.2f%%", avgEff), fontNormal, Color.LIGHT_GRAY);
 
             document.add(adminSummary);
@@ -241,17 +249,18 @@ public class PdfReportService {
 
             // User Performance Table
             Paragraph userTableTitle = new Paragraph("User Performance Breakdown", fontSubtitle);
-            userTableTitle.setSpacingBefore(10f);
+            userTableTitle.setSpacingBefore(15f);
             document.add(userTableTitle);
 
             PdfPTable userTable = new PdfPTable(4);
             userTable.setWidthPercentage(100);
             userTable.setSpacingBefore(10f);
+            userTable.setWidths(new float[]{3, 4, 2, 2});
 
-            addCell(userTable, "Full Name", fontHeader, Color.DARK_GRAY);
-            addCell(userTable, "Email", fontHeader, Color.DARK_GRAY);
-            addCell(userTable, "Data Points", fontHeader, Color.DARK_GRAY);
-            addCell(userTable, "Efficiency Avg", fontHeader, Color.DARK_GRAY);
+            addCell(userTable, "Owner Name", fontHeader, Color.DARK_GRAY);
+            addCell(userTable, "Email Address", fontHeader, Color.DARK_GRAY);
+            addCell(userTable, "Logs", fontHeader, Color.DARK_GRAY);
+            addCell(userTable, "Avg Eff", fontHeader, Color.DARK_GRAY);
 
             for (User u : users) {
                 long count = filteredAllData.stream().filter(d -> d.getUser() != null && d.getUser().getId().equals(u.getId())).count();
@@ -260,24 +269,18 @@ public class PdfReportService {
                         .mapToDouble(d -> d.getEfficiency() != null ? d.getEfficiency() : 0)
                         .average().orElse(0.0);
 
-                if (count == 0)
-                    continue; // Only show active users in the range report
+                if (count == 0) continue; 
 
-                addCell(userTable, (u.getFullName() != null ? u.getFullName() : "User"), fontNormal, Color.LIGHT_GRAY);
+                addCell(userTable, (u.getFullName() != null ? u.getFullName() : u.getUsername()), fontNormal, Color.LIGHT_GRAY);
                 addCell(userTable, (u.getEmail() != null ? u.getEmail() : "N/A"), fontNormal, Color.LIGHT_GRAY);
                 addCell(userTable, String.valueOf(count), fontNormal, Color.LIGHT_GRAY);
-                addCell(userTable, String.format("%.2f%%", userAvgEff), fontNormal, Color.LIGHT_GRAY);
+                addCell(userTable, String.format("%.1f%%", userAvgEff), fontNormal, Color.LIGHT_GRAY);
             }
 
             document.add(userTable);
 
-            // Overall Analytics Summary
-            document.add(new Paragraph("\nSummary Insight:", fontSubtitle));
-            document.add(new Paragraph("The system is currently operating at an average efficiency of " + String.format("%.2f%%", avgEff) +
-                    ". Administrative oversight is recommended for users falling below 50% efficiency.", fontNormal));
-
             // Footer
-            Paragraph footer = new Paragraph("\n\nOfficial Admin System Report - Generated by REPM Engine", fontFooter);
+            Paragraph footer = new Paragraph("\n\n© 2026 REPM Administrative Engine - System-wide performance audit.", fontFooter);
             footer.setAlignment(Element.ALIGN_CENTER);
             document.add(footer);
 

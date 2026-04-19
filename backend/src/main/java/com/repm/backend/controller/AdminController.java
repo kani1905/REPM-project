@@ -112,7 +112,16 @@ public class AdminController {
         Long parentId = Long.valueOf(payload.get("parentId").toString());
         String message = payload.get("message").toString();
         com.repm.backend.entity.Notification parent = notificationRepository.findById(parentId).orElseThrow(() -> new RuntimeException("Message not found"));
-        User recipient = userRepository.findByUsername(parent.getSenderUsername()).orElseThrow(() -> new RuntimeException("Recipient not found"));
+        
+        // If the admin is replying to a message they SENT, the recipient is parent.user
+        // If the admin is replying to a message they RECEIVED, the recipient is found by senderUsername
+        User recipient;
+        if (parent.getSenderUsername() != null && parent.getSenderUsername().equals(principal.getName())) {
+            recipient = parent.getUser();
+        } else {
+            recipient = userRepository.findByUsername(parent.getSenderUsername()).orElseThrow(() -> new RuntimeException("Recipient not found"));
+        }
+        
         notificationService.createNotification(recipient, message, "REPLY", "ADMIN_TO_USER", principal.getName(), parentId);
         return ResponseEntity.ok(Map.of("message", "Reply sent"));
     }
@@ -170,7 +179,8 @@ public class AdminController {
 
         List<com.repm.backend.entity.Notification> notifications = notificationRepository.findByUser(user);
 
-        byte[] pdfBytes = pdfReportService.generatePerformanceReport(user, data, notifications, range);
+        java.io.ByteArrayInputStream bis = pdfReportService.generateUserReport(user, data, notifications, range.toUpperCase());
+        byte[] pdfBytes = bis.readAllBytes();
 
         HttpHeaders headers = new HttpHeaders();
         headers.add("Content-Disposition", "inline; filename=" + user.getUsername() + "_report.pdf");

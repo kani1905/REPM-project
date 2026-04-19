@@ -212,11 +212,13 @@ function viewMessage(id) {
     document.getElementById('detailView').style.display = 'block';
     
     document.getElementById('viewSubject').textContent = `Re: ${currentMsg.source} Performance Notification`;
-    document.getElementById('viewSender').textContent = currentMsg.senderUsername || 'System';
-    document.getElementById('viewEmail').textContent = currentMsg.user ? `<${currentMsg.user.email}>` : '';
-    document.getElementById('viewTime').textContent = new Date(currentMsg.timestamp).toLocaleString();
-    document.getElementById('viewBody').textContent = currentMsg.message;
-    document.getElementById('senderInitial').textContent = (currentMsg.senderUsername || 'S')[0].toUpperCase();
+    if (currentTab === 'SENT') {
+        document.getElementById('viewSender').textContent = 'To: ' + (currentMsg.user ? currentMsg.user.username : 'User');
+        document.getElementById('senderInitial').textContent = (currentMsg.user ? currentMsg.user.username : 'U')[0].toUpperCase();
+    } else {
+        document.getElementById('viewSender').textContent = currentMsg.senderUsername || 'System';
+        document.getElementById('senderInitial').textContent = (currentMsg.senderUsername || 'S')[0].toUpperCase();
+    }
     
     if (!currentMsg.isRead && currentTab === 'INBOX') {
         fetch(`${API}/admin/notifications/${id}/read`, { method: 'POST', credentials: 'include' });
