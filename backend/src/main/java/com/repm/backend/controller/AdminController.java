@@ -92,14 +92,25 @@ public class AdminController {
 
     @PostMapping("/notify")
     public ResponseEntity<?> sendNotification(@RequestBody Map<String, Object> payload, Principal principal) {
-        Long userId = Long.valueOf(payload.get("userId").toString());
-        String message = payload.get("message").toString();
-        String source = payload.get("source").toString();
+        try {
+            if (payload.get("userId") == null || payload.get("userId").toString().isEmpty()) {
+                return ResponseEntity.status(400).body(Map.of("message", "User ID is required"));
+            }
+            
+            Long userId = Long.valueOf(payload.get("userId").toString());
+            String message = payload.get("message").toString();
+            String source = payload.get("source").toString();
 
-        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
-        notificationService.createNotification(user, message, source, "ADMIN_TO_USER", principal.getName(), null);
+            java.util.Optional<User> userOpt = userRepository.findById(userId);
+            if (userOpt.isEmpty()) {
+                return ResponseEntity.status(404).body(Map.of("message", "User with ID " + userId + " not found"));
+            }
 
-        return ResponseEntity.ok(Map.of("message", "Notification sent"));
+            notificationService.createNotification(userOpt.get(), message, source, "ADMIN_TO_USER", principal.getName(), null);
+            return ResponseEntity.ok(Map.of("message", "Notification sent successfully"));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("message", "Server Error: " + e.getMessage()));
+        }
     }
 
     @GetMapping("/notifications/sent")

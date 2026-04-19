@@ -3,52 +3,100 @@
 <head>
     <title>Leaderboard - REPM Admin</title>
     <meta charset="UTF-8">
-    <style>
-        body { margin:0; font-family:Arial,sans-serif; background:#e0f7fa; display:flex; }
-        .sidebar { position:fixed; top:0; left:0; width:220px; height:100%; background:#1e3c72; color:white; display:flex; flex-direction:column; padding:20px 0; }
-        .sidebar a { color:white; padding:15px 25px; margin:5px 0; border-radius:6px; text-decoration:none; display:block; font-weight:bold; }
-        .sidebar a:hover, .sidebar a.active { background:rgba(255,255,255,0.2); }
-        .sidebar h2 { text-align:center; margin-bottom:30px; }
-        .main { margin-left:240px; padding:40px; flex:1; }
-        .box { background:white; padding:30px; border-radius:12px; margin-bottom:20px; box-shadow:0 5px 30px rgba(0,0,0,0.2); }
-        .grid3 { display:grid; grid-template-columns:repeat(3,1fr); gap:20px; }
-        table { width:100%; border-collapse:collapse; }
-        th,td { padding:10px 15px; border-bottom:1px solid #ddd; }
-        th { background:#1e3c72; color:white; }
-    </style>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-<div class="sidebar">
-    <h2>⚡ REPM</h2>
-    <a href="dashboard.html">🏠 Dashboard</a>
-    <a href="analytics.html">📊 Analytics</a>
-    <a href="users.html">👥 Users</a>
-    <a href="leaderboard.html" class="active">🏆 Leaderboard</a>
-    <a href="notifications.html">🔔 Notifications</a>
-    <a href="settings.html">⚙ Settings</a>
-    <a href="#" onclick="logout()" style="margin-top:auto; background:#ef4444;">🚪 Logout</a>
-</div>
+<body class="flex h-screen bg-gray-50 dark:bg-gray-900 dark:text-white overflow-hidden text-sm">
 
-<div class="main">
-    <h2>🏆 Leaderboard</h2>
-    <div class="grid3">
-        <div class="box">
-            <h3>☀ Solar Leaders</h3>
-            <table><thead><tr><th>#</th><th>Username</th><th>Efficiency</th></tr></thead>
-            <tbody id="solarList"><tr><td colspan="3">Loading...</td></tr></tbody></table>
+    <!-- ===== SIDEBAR ===== -->
+    <aside class="w-64 h-screen bg-gradient-to-b from-blue-900 via-blue-800 to-blue-700 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 text-white flex flex-col justify-between shadow-2xl flex-shrink-0 z-50">
+        <div class="overflow-y-auto">
+            <div class="p-6 border-b border-blue-700/50">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-yellow-400 rounded-xl flex items-center justify-center text-blue-900 font-bold text-lg shadow-lg shadow-yellow-500/20">⚡</div>
+                    <div>
+                        <h1 class="text-xl font-bold tracking-tight">REPM</h1>
+                        <p class="text-blue-200 text-[10px] uppercase tracking-widest font-bold opacity-70">Energy Monitor</p>
+                    </div>
+                </div>
+            </div>
+
+            <ul class="space-y-1 px-3 py-4">
+                <li><a href="dashboard.html" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all opacity-80 hover:opacity-100 hover:bg-white/10">🏠 <span>Dashboard</span></a></li>
+                <li><a href="analytics.html" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all opacity-80 hover:opacity-100 hover:bg-white/10">📊 <span>Analytics</span></a></li>
+                <li><a href="users.html" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all opacity-80 hover:opacity-100 hover:bg-white/10">👥 <span>Users</span></a></li>
+                <li><a href="leaderboard.html" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-white/20 font-bold shadow-inner">🏆 <span>Leaderboard</span></a></li>
+                <li><a href="notifications.html" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all opacity-80 hover:opacity-100 hover:bg-white/10">🔔 <span>Notifications</span></a></li>
+                <li><a href="settings.html" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all opacity-80 hover:opacity-100 hover:bg-white/10">⚙️ <span>Settings</span></a></li>
+            </ul>
         </div>
-        <div class="box">
-            <h3>💨 Wind Leaders</h3>
-            <table><thead><tr><th>#</th><th>Username</th><th>Efficiency</th></tr></thead>
-            <tbody id="windList"><tr><td colspan="3">Loading...</td></tr></tbody></table>
+        <div class="p-4 border-t border-blue-700/30">
+            <button onclick="logout()" class="w-full bg-red-500/80 hover:bg-red-500 py-3 rounded-xl text-center font-bold transition-all shadow-lg shadow-red-900/20">🚪 Logout</button>
         </div>
-        <div class="box">
-            <h3>💧 Hydro Leaders</h3>
-            <table><thead><tr><th>#</th><th>Username</th><th>Efficiency</th></tr></thead>
-            <tbody id="hydroList"><tr><td colspan="3">Loading...</td></tr></tbody></table>
-        </div>
+    </aside>
+
+    <div class="flex-1 flex flex-col overflow-y-auto">
+        <header class="bg-white dark:bg-gray-800 border-b dark:border-gray-700 px-8 py-4 flex items-center justify-between shadow-sm flex-shrink-0">
+            <div>
+                <h2 class="text-2xl font-bold text-gray-800 dark:text-white">🏆 Efficiency Leaderboard</h2>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Top performers across Solar, Wind, and Hydro sectors</p>
+            </div>
+        </header>
+
+        <main class="p-8">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Solar -->
+                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border dark:border-gray-700 overflow-hidden border-t-4 border-t-yellow-400">
+                    <div class="p-6 bg-yellow-50 dark:bg-yellow-900/10 border-b dark:border-gray-700">
+                        <h3 class="text-lg font-bold flex items-center gap-2">☀️ Solar Leaders</h3>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead class="bg-gray-50 dark:bg-gray-700 text-gray-500 uppercase text-[10px] font-bold">
+                                <tr><th class="p-4">#</th><th class="p-4">Username</th><th class="p-4 text-right">Efficiency</th></tr>
+                            </thead>
+                            <tbody id="solarList" class="divide-y dark:divide-gray-700">
+                                <tr><td colspan="3" class="p-8 text-center text-gray-400">Loading...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Wind -->
+                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border dark:border-gray-700 overflow-hidden border-t-4 border-t-blue-400">
+                    <div class="p-6 bg-blue-50 dark:bg-blue-900/10 border-b dark:border-gray-700">
+                        <h3 class="text-lg font-bold flex items-center gap-2">💨 Wind Leaders</h3>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead class="bg-gray-50 dark:bg-gray-700 text-gray-500 uppercase text-[10px] font-bold">
+                                <tr><th class="p-4">#</th><th class="p-4">Username</th><th class="p-4 text-right">Efficiency</th></tr>
+                            </thead>
+                            <tbody id="windList" class="divide-y dark:divide-gray-700">
+                                <tr><td colspan="3" class="p-8 text-center text-gray-400">Loading...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Hydro -->
+                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border dark:border-gray-700 overflow-hidden border-t-4 border-t-cyan-400">
+                    <div class="p-6 bg-cyan-50 dark:bg-cyan-900/10 border-b dark:border-gray-700">
+                        <h3 class="text-lg font-bold flex items-center gap-2">💧 Hydro Leaders</h3>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead class="bg-gray-50 dark:bg-gray-700 text-gray-500 uppercase text-[10px] font-bold">
+                                <tr><th class="p-4">#</th><th class="p-4">Username</th><th class="p-4 text-right">Efficiency</th></tr>
+                            </thead>
+                            <tbody id="hydroList" class="divide-y dark:divide-gray-700">
+                                <tr><td colspan="3" class="p-8 text-center text-gray-400">Loading...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
     </div>
-</div>
 
 <script>
 const API = 'https://repm-project-production.up.railway.app';
@@ -60,8 +108,13 @@ async function logout() {
 
 function renderLeaders(list, elementId) {
     const tbody = document.getElementById(elementId);
-    if (!list || list.length === 0) { tbody.innerHTML = '<tr><td colspan="3">No data</td></tr>'; return; }
-    tbody.innerHTML = list.map((u, i) => `<tr><td>${i+1}</td><td>${u.username}</td><td>${(u.efficiency||0).toFixed(2)}%</td></tr>`).join('');
+    if (!list || list.length === 0) { tbody.innerHTML = '<tr><td colspan="3" class="p-8 text-center text-gray-400">No data available</td></tr>'; return; }
+    tbody.innerHTML = list.map((u, i) => `
+        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+            <td class="p-4 font-bold text-gray-400">${i+1}</td>
+            <td class="p-4 font-semibold text-gray-700 dark:text-gray-200">${u.username}</td>
+            <td class="p-4 text-right font-bold text-blue-600">${(u.efficiency||0).toFixed(2)}%</td>
+        </tr>`).join('');
 }
 
 async function loadLeaderboard() {

@@ -1,90 +1,118 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Analytics - REPM Admin</title>
+    <title>Send Notifications - REPM Admin</title>
     <meta charset="UTF-8">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        body { margin:0; font-family:Arial,sans-serif; background:#e0f7fa; display:flex; }
-        .sidebar { position:fixed; top:0; left:0; width:220px; height:100%; background:#1e3c72; color:white; display:flex; flex-direction:column; padding:20px 0; }
-        .sidebar a { color:white; padding:15px 25px; margin:5px 0; border-radius:6px; text-decoration:none; display:block; font-weight:bold; }
-        .sidebar a:hover, .sidebar a.active { background:rgba(255,255,255,0.2); }
-        .sidebar h2 { text-align:center; margin-bottom:30px; }
-        .main { margin-left:240px; padding:40px; flex:1; }
-        .box { background:white; padding:30px; border-radius:12px; margin-bottom:20px; box-shadow:0 5px 30px rgba(0,0,0,0.2); }
-        table { width:100%; border-collapse:collapse; }
-        th,td { padding:10px 15px; border-bottom:1px solid #ddd; text-align:left; }
-        th { background:#1e3c72; color:white; }
-        input,select { padding:8px 12px; border:1px solid #ccc; border-radius:6px; }
-        button.btn { background:#1e3c72; color:white; border:none; padding:8px 14px; border-radius:6px; cursor:pointer; }
-    </style>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-<div class="sidebar">
-    <h2>⚡ REPM</h2>
-    <a href="dashboard.html">🏠 Dashboard</a>
-    <a href="analytics.html" class="active">📊 Analytics</a>
-    <a href="users.html">👥 Users</a>
-    <a href="leaderboard.html">🏆 Leaderboard</a>
-    <a href="notifications.html">🔔 Notifications</a>
-    <a href="settings.html">⚙ Settings</a>
-    <a href="#" onclick="logout()" style="margin-top:auto; background:#ef4444;">🚪 Logout</a>
-</div>
+<body class="flex h-screen bg-gray-50 dark:bg-gray-900 dark:text-white overflow-hidden text-sm">
 
-<div class="main">
-    <div class="box" style="border-top:5px solid #10b981;">
-        <h2>📄 Download Performance Reports</h2>
-        <div style="display:flex; gap:15px; flex-wrap:wrap; align-items:flex-end;">
-            <div style="flex:1; min-width:200px;">
-                <label>Select User</label><br>
-                <select id="reportUser" style="width:100%;">
-                    <option value="">-- Choose User --</option>
-                </select>
+    <!-- ===== SIDEBAR ===== -->
+    <aside class="w-64 h-screen bg-gradient-to-b from-blue-900 via-blue-800 to-blue-700 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 text-white flex flex-col justify-between shadow-2xl flex-shrink-0 z-50">
+        <div class="overflow-y-auto">
+            <div class="p-6 border-b border-blue-700/50">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-yellow-400 rounded-xl flex items-center justify-center text-blue-900 font-bold text-lg shadow-lg shadow-yellow-500/20">⚡</div>
+                    <div>
+                        <h1 class="text-xl font-bold tracking-tight">REPM</h1>
+                        <p class="text-blue-200 text-[10px] uppercase tracking-widest font-bold opacity-70">Energy Monitor</p>
+                    </div>
+                </div>
             </div>
-            <div>
-                <label>Source</label><br>
-                <select id="reportSource">
-                    <option value="">All Sources</option>
-                    <option value="Solar">Solar</option>
-                    <option value="Wind">Wind</option>
-                    <option value="Hydro">Hydro</option>
-                </select>
-            </div>
-            <div>
-                <label>Time Range</label><br>
-                <select id="reportRange">
-                    <option value="today">Today</option>
-                    <option value="weekly">Weekly</option>
-                    <option value="monthly" selected>Monthly</option>
-                </select>
-            </div>
-            <button class="btn" style="background:#10b981;" onclick="downloadUserReport()">📥 Download PDF</button>
-        </div>
-    </div>
 
-    <div class="box">
-        <h2>📊 All Energy Data</h2>
-        <div style="margin-bottom:15px; display:flex; gap:10px; align-items:flex-end;">
-            <div>
-                <label>ID to Update:</label><br>
-                <input type="number" id="updateId" placeholder="Entry ID">
-            </div>
-            <div>
-                <label>Produced (kWh):</label><br>
-                <input type="number" step="0.01" id="updateProduced" placeholder="Produced">
-            </div>
-            <div>
-                <label>Consumed (kWh):</label><br>
-                <input type="number" step="0.01" id="updateConsumed" placeholder="Consumed">
-            </div>
-            <button class="btn" onclick="updateData()">Update</button>
+            <ul class="space-y-1 px-3 py-4">
+                <li><a href="dashboard.html" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all opacity-80 hover:opacity-100 hover:bg-white/10">🏠 <span>Dashboard</span></a></li>
+                <li><a href="analytics.html" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-white/20 font-bold shadow-inner">📊 <span>Analytics</span></a></li>
+                <li><a href="users.html" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all opacity-80 hover:opacity-100 hover:bg-white/10">👥 <span>Users</span></a></li>
+                <li><a href="leaderboard.html" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all opacity-80 hover:opacity-100 hover:bg-white/10">🏆 <span>Leaderboard</span></a></li>
+                <li><a href="notifications.html" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all opacity-80 hover:opacity-100 hover:bg-white/10">🔔 <span>Notifications</span></a></li>
+                <li><a href="settings.html" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all opacity-80 hover:opacity-100 hover:bg-white/10">⚙️ <span>Settings</span></a></li>
+            </ul>
         </div>
-        <table id="analyticsTable">
-            <thead><tr><th>ID</th><th>User</th><th>Source</th><th>Produced</th><th>Consumed</th><th>Efficiency</th><th>Bill</th><th>Date</th></tr></thead>
-            <tbody id="analyticsRows"><tr><td colspan="8">Loading...</td></tr></tbody>
-        </table>
+        <div class="p-4 border-t border-blue-700/30">
+            <button onclick="logout()" class="w-full bg-red-500/80 hover:bg-red-500 py-3 rounded-xl text-center font-bold transition-all shadow-lg shadow-red-900/20">🚪 Logout</button>
+        </div>
+    </aside>
+
+    <div class="flex-1 flex flex-col overflow-y-auto">
+        <header class="bg-white dark:bg-gray-800 border-b dark:border-gray-700 px-8 py-4 flex items-center justify-between shadow-sm flex-shrink-0">
+            <div>
+                <h2 class="text-2xl font-bold text-gray-800 dark:text-white">📊 Admin Analytics</h2>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Manage all user energy data and performance reports</p>
+            </div>
+        </header>
+
+        <main class="p-8 space-y-8">
+            <div class="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-sm border dark:border-gray-700">
+                <h2 class="text-xl font-bold mb-6 flex items-center gap-2 text-green-600">📄 Download Performance Reports</h2>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 items-end">
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-gray-400 mb-2">Select User</label>
+                        <select id="reportUser" class="w-full p-3 bg-gray-50 dark:bg-gray-700 border dark:border-gray-600 rounded-xl outline-none focus:ring-2 focus:ring-green-500">
+                            <option value="">-- Choose User --</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-gray-400 mb-2">Source</label>
+                        <select id="reportSource" class="w-full p-3 bg-gray-50 dark:bg-gray-700 border dark:border-gray-600 rounded-xl outline-none focus:ring-2 focus:ring-green-500">
+                            <option value="">All Sources</option>
+                            <option value="Solar">Solar</option>
+                            <option value="Wind">Wind</option>
+                            <option value="Hydro">Hydro</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-gray-400 mb-2">Time Range</label>
+                        <select id="reportRange" class="w-full p-3 bg-gray-50 dark:bg-gray-700 border dark:border-gray-600 rounded-xl outline-none focus:ring-2 focus:ring-green-500">
+                            <option value="today">Today</option>
+                            <option value="weekly">Weekly</option>
+                            <option value="monthly" selected>Monthly</option>
+                        </select>
+                    </div>
+                    <button class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg shadow-green-900/20 transition-all" onclick="downloadUserReport()">📥 Download PDF</button>
+                </div>
+            </div>
+
+            <div class="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-sm border dark:border-gray-700">
+                <h2 class="text-xl font-bold mb-6 flex items-center gap-2 text-blue-600">📊 All Energy Data</h2>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 items-end mb-8">
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-gray-400 mb-2">ID to Update</label>
+                        <input type="number" id="updateId" placeholder="Entry ID" class="w-full p-3 bg-gray-50 dark:bg-gray-700 border dark:border-gray-600 rounded-xl">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-gray-400 mb-2">Produced (kWh)</label>
+                        <input type="number" step="0.01" id="updateProduced" placeholder="Produced" class="w-full p-3 bg-gray-50 dark:bg-gray-700 border dark:border-gray-600 rounded-xl">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-gray-400 mb-2">Consumed (kWh)</label>
+                        <input type="number" step="0.01" id="updateConsumed" placeholder="Consumed" class="w-full p-3 bg-gray-50 dark:bg-gray-700 border dark:border-gray-600 rounded-xl">
+                    </div>
+                    <button class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl transition-all shadow-lg shadow-blue-900/20" onclick="updateData()">Update Data</button>
+                </div>
+
+                <div class="overflow-x-auto rounded-xl border dark:border-gray-700">
+                    <table class="w-full text-left">
+                        <thead class="bg-gray-50 dark:bg-gray-700 text-gray-500 uppercase text-[10px] font-bold">
+                            <tr>
+                                <th class="p-4">ID</th>
+                                <th class="p-4">User</th>
+                                <th class="p-4">Source</th>
+                                <th class="p-4">Produced</th>
+                                <th class="p-4">Consumed</th>
+                                <th class="p-4">Efficiency</th>
+                                <th class="p-4">Bill</th>
+                                <th class="p-4">Date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="analyticsRows" class="divide-y dark:divide-gray-700">
+                            <tr><td colspan="8" class="p-8 text-center text-gray-400">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
     </div>
-</div>
 
 <script>
 const API = 'https://repm-project-production.up.railway.app';

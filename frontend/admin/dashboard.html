@@ -3,67 +3,99 @@
 <head>
     <title>Admin Dashboard - REPM</title>
     <meta charset="UTF-8">
-    <style>
-        body { margin:0; font-family:Arial,sans-serif; background:#e0f7fa; display:flex; }
-        .sidebar { position:fixed; top:0; left:0; width:220px; height:100%; background:#1e3c72; color:white; display:flex; flex-direction:column; padding:20px 0; box-shadow:3px 0 15px rgba(0,0,0,0.1); }
-        .sidebar a { color:white; padding:15px 25px; margin:5px 0; border-radius:6px; transition:background 0.3s; text-decoration:none; display:block; font-weight:bold; }
-        .sidebar a:hover, .sidebar a.active { background:rgba(255,255,255,0.2); }
-        .sidebar h2 { text-align:center; margin-bottom:30px; }
-        .main { margin-left:240px; padding:40px; flex:1; }
-        .box { background:white; padding:30px; border-radius:12px; margin-bottom:20px; box-shadow:0 5px 30px rgba(0,0,0,0.2); }
-        .grid3 { display:grid; grid-template-columns:repeat(3,1fr); gap:20px; }
-        .grid4 { display:grid; grid-template-columns:repeat(4,1fr); gap:20px; }
-        .stat { background:white; padding:20px; border-radius:10px; box-shadow:0 3px 15px rgba(0,0,0,0.1); text-align:center; }
-        .stat h4 { color:#555; margin:0; }
-        .stat p { font-size:24px; font-weight:bold; color:#1e3c72; margin:10px 0 0; }
-        button { cursor:pointer; }
-    </style>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-<div class="sidebar">
-    <h2>⚡ REPM</h2>
-    <a href="dashboard.html" class="active">🏠 Dashboard</a>
-    <a href="analytics.html">📊 Analytics</a>
-    <a href="users.html">👥 Users</a>
-    <a href="leaderboard.html">🏆 Leaderboard</a>
-    <a href="notifications.html">🔔 Notifications</a>
-    <a href="settings.html">⚙ Settings</a>
-    <a href="#" onclick="logout()" style="margin-top:auto; background:#ef4444;">🚪 Logout</a>
-</div>
+<body class="flex h-screen bg-gray-50 dark:bg-gray-900 dark:text-white overflow-hidden text-sm">
 
-<div class="main">
-    <h2>Admin Dashboard</h2>
-    <p>Welcome, <b id="adminName">Admin</b>!</p>
+    <!-- ===== SIDEBAR ===== -->
+    <aside class="w-64 h-screen bg-gradient-to-b from-blue-900 via-blue-800 to-blue-700 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 text-white flex flex-col justify-between shadow-2xl flex-shrink-0 z-50">
+        <div class="overflow-y-auto">
+            <div class="p-6 border-b border-blue-700/50">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-yellow-400 rounded-xl flex items-center justify-center text-blue-900 font-bold text-lg shadow-lg shadow-yellow-500/20">⚡</div>
+                    <div>
+                        <h1 class="text-xl font-bold tracking-tight">REPM</h1>
+                        <p class="text-blue-200 text-[10px] uppercase tracking-widest font-bold opacity-70">Energy Monitor</p>
+                    </div>
+                </div>
+            </div>
 
-    <h3>📊 Overall Statistics</h3>
-    <div class="grid4">
-        <div class="stat"><h4>Avg Efficiency</h4><p id="avgEff">0</p></div>
-        <div class="stat"><h4>Avg CO2 Consumed</h4><p id="avgCO2c">0</p></div>
-        <div class="stat"><h4>Avg CO2 Produced</h4><p id="avgCO2p">0</p></div>
-        <div class="stat"><h4>Total Bill (₹)</h4><p id="totalBill">0</p></div>
+            <ul class="space-y-1 px-3 py-4">
+                <li><a href="dashboard.html" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-white/20 font-bold shadow-inner">🏠 <span>Dashboard</span></a></li>
+                <li><a href="analytics.html" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all opacity-80 hover:opacity-100 hover:bg-white/10">📊 <span>Analytics</span></a></li>
+                <li><a href="users.html" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all opacity-80 hover:opacity-100 hover:bg-white/10">👥 <span>Users</span></a></li>
+                <li><a href="leaderboard.html" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all opacity-80 hover:opacity-100 hover:bg-white/10">🏆 <span>Leaderboard</span></a></li>
+                <li><a href="notifications.html" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all opacity-80 hover:opacity-100 hover:bg-white/10">🔔 <span>Notifications</span></a></li>
+                <li><a href="settings.html" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all opacity-80 hover:opacity-100 hover:bg-white/10">⚙️ <span>Settings</span></a></li>
+            </ul>
+        </div>
+        <div class="p-4 border-t border-blue-700/30">
+            <button onclick="logout()" class="w-full bg-red-500/80 hover:bg-red-500 py-3 rounded-xl text-center font-bold transition-all shadow-lg shadow-red-900/20">🚪 Logout</button>
+        </div>
+    </aside>
+
+    <div class="flex-1 flex flex-col overflow-y-auto">
+        <header class="bg-white dark:bg-gray-800 border-b dark:border-gray-700 px-8 py-4 flex items-center justify-between shadow-sm flex-shrink-0">
+            <div>
+                <h2 class="text-2xl font-bold text-gray-800 dark:text-white">🚀 Admin Overview</h2>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Welcome back, <b id="adminName" class="text-blue-600">Admin</b>!</p>
+            </div>
+        </header>
+
+        <main class="p-8 space-y-8">
+            <section>
+                <h3 class="text-xs font-bold uppercase text-gray-400 tracking-widest mb-4">📊 Overall Statistics</h3>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border dark:border-gray-700">
+                        <h4 class="text-gray-500 text-xs font-bold uppercase mb-2">Avg Efficiency</h4>
+                        <p id="avgEff" class="text-2xl font-bold text-blue-600">0%</p>
+                    </div>
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border dark:border-gray-700">
+                        <h4 class="text-gray-500 text-xs font-bold uppercase mb-2">Avg CO2 Consumed</h4>
+                        <p id="avgCO2c" class="text-2xl font-bold text-green-600">0</p>
+                    </div>
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border dark:border-gray-700">
+                        <h4 class="text-gray-500 text-xs font-bold uppercase mb-2">Avg CO2 Produced</h4>
+                        <p id="avgCO2p" class="text-2xl font-bold text-red-500">0</p>
+                    </div>
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border dark:border-gray-700">
+                        <h4 class="text-gray-500 text-xs font-bold uppercase mb-2">Total Bill</h4>
+                        <p id="totalBill" class="text-2xl font-bold text-gray-900 dark:text-white">₹0</p>
+                    </div>
+                </div>
+            </section>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Solar -->
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border dark:border-gray-700 border-t-4 border-t-yellow-400">
+                    <h3 class="font-bold text-lg mb-4 flex items-center gap-2">☀️ Solar Energy</h3>
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center"><span class="text-gray-400">Efficiency</span> <b id="solarEff" class="text-yellow-600">0%</b></div>
+                        <div class="flex justify-between items-center"><span class="text-gray-400">CO2 Saving</span> <b id="solarCO2" class="text-green-600">0</b></div>
+                        <div class="flex justify-between items-center"><span class="text-gray-400">Revenue/Bill</span> <b id="solarBill">₹0</b></div>
+                    </div>
+                </div>
+                <!-- Wind -->
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border dark:border-gray-700 border-t-4 border-t-blue-400">
+                    <h3 class="font-bold text-lg mb-4 flex items-center gap-2">💨 Wind Energy</h3>
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center"><span class="text-gray-400">Efficiency</span> <b id="windEff" class="text-blue-600">0%</b></div>
+                        <div class="flex justify-between items-center"><span class="text-gray-400">CO2 Saving</span> <b id="windCO2" class="text-green-600">0</b></div>
+                        <div class="flex justify-between items-center"><span class="text-gray-400">Revenue/Bill</span> <b id="windBill">₹0</b></div>
+                    </div>
+                </div>
+                <!-- Hydro -->
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border dark:border-gray-700 border-t-4 border-t-cyan-400">
+                    <h3 class="font-bold text-lg mb-4 flex items-center gap-2">💧 Hydro Energy</h3>
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center"><span class="text-gray-400">Efficiency</span> <b id="hydroEff" class="text-cyan-600">0%</b></div>
+                        <div class="flex justify-between items-center"><span class="text-gray-400">CO2 Saving</span> <b id="hydroCO2" class="text-green-600">0</b></div>
+                        <div class="flex justify-between items-center"><span class="text-gray-400">Revenue/Bill</span> <b id="hydroBill">₹0</b></div>
+                    </div>
+                </div>
+            </div>
+        </main>
     </div>
-
-    <h3 style="margin-top:30px;">☀ Solar</h3>
-    <div class="grid3">
-        <div class="stat"><h4>Efficiency</h4><p id="solarEff">0</p></div>
-        <div class="stat"><h4>CO2</h4><p id="solarCO2">0</p></div>
-        <div class="stat"><h4>Bill (₹)</h4><p id="solarBill">0</p></div>
-    </div>
-
-    <h3 style="margin-top:30px;">💨 Wind</h3>
-    <div class="grid3">
-        <div class="stat"><h4>Efficiency</h4><p id="windEff">0</p></div>
-        <div class="stat"><h4>CO2</h4><p id="windCO2">0</p></div>
-        <div class="stat"><h4>Bill (₹)</h4><p id="windBill">0</p></div>
-    </div>
-
-    <h3 style="margin-top:30px;">💧 Hydro</h3>
-    <div class="grid3">
-        <div class="stat"><h4>Efficiency</h4><p id="hydroEff">0</p></div>
-        <div class="stat"><h4>CO2</h4><p id="hydroCO2">0</p></div>
-        <div class="stat"><h4>Bill (₹)</h4><p id="hydroBill">0</p></div>
-    </div>
-</div>
 
 <script>
 const API = 'https://repm-project-production.up.railway.app';

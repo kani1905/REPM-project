@@ -1,82 +1,84 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Send Notifications - REPM Admin</title>
+    <title>Notifications - REPM</title>
     <meta charset="UTF-8">
-    <style>
-        body { margin:0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:#e0f7fa; display:flex; height: 100vh; }
-        
-        /* Sidebar */
-        .sidebar { width: 220px; background: #1e3c72; color: white; display: flex; flex-direction: column; padding: 20px 0; position: fixed; height: 100%; }
-        .sidebar h2 { text-align: center; margin-bottom: 30px; font-size: 24px; }
-        .sidebar a { color: white; padding: 15px 25px; text-decoration: none; font-weight: bold; display: flex; align-items: center; gap: 10px; transition: 0.3s; }
-        .sidebar a:hover, .sidebar a.active { background: rgba(255,255,255,0.1); border-left: 4px solid #fff; }
-        
-        .main { margin-left: 220px; padding: 40px; flex: 1; }
-        
-        .card { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
-        .card-header { display: flex; items-center: center; gap: 10px; margin-bottom: 25px; }
-        .card-header h2 { margin: 0; color: #1e3c72; font-size: 20px; }
-        
-        .form-row { display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap; }
-        .input-group { display: flex; flex-direction: column; gap: 5px; }
-        .input-group label { font-size: 13px; font-weight: bold; color: #555; }
-        .input-group input, .input-group select { padding: 10px; border: 1px solid #ddd; border-radius: 8px; background: #f8f9fa; min-width: 150px; }
-        .input-group input:focus { outline: none; border-color: #1e3c72; }
-        
-        .btn-send { background: #1e3c72; color: white; border: none; padding: 12px 25px; border-radius: 8px; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 8px; transition: 0.3s; margin-left: auto; }
-        .btn-send:hover { background: #2a5298; transform: translateY(-2px); }
-        
-        .logout-btn { margin-top: auto; background: #d32f2f; }
-    </style>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
+<body class="flex h-screen bg-gray-50 dark:bg-gray-900 dark:text-white overflow-hidden text-sm">
 
-<div class="sidebar">
-    <h2>⚡ REPM</h2>
-    <a href="dashboard.html">🏠 Dashboard</a>
-    <a href="analytics.html">📊 Analytics</a>
-    <a href="users.html">👥 Users</a>
-    <a href="leaderboard.html">🏆 Leaderboard</a>
-    <a href="notifications.html" class="active">🔔 Notifications</a>
-    <a href="settings.html">⚙ Settings</a>
-    <a href="#" onclick="logout()" class="logout-btn">🚪 Logout</a>
-</div>
+    <!-- ===== SIDEBAR ===== -->
+    <aside class="w-64 h-screen bg-gradient-to-b from-blue-900 via-blue-800 to-blue-700 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 text-white flex flex-col justify-between shadow-2xl flex-shrink-0 z-50">
+        <div class="overflow-y-auto">
+            <div class="p-6 border-b border-blue-700/50">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-yellow-400 rounded-xl flex items-center justify-center text-blue-900 font-bold text-lg shadow-lg shadow-yellow-500/20">⚡</div>
+                    <div>
+                        <h1 class="text-xl font-bold tracking-tight">REPM</h1>
+                        <p class="text-blue-200 text-[10px] uppercase tracking-widest font-bold opacity-70">Energy Monitor</p>
+                    </div>
+                </div>
+            </div>
 
-<div class="main">
-    <div class="card">
-        <div class="card-header">
-            <span>📢</span>
-            <h2>Send Notification to User</h2>
+            <ul class="space-y-1 px-3 py-4">
+                <li><a href="dashboard.html" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all opacity-80 hover:opacity-100 hover:bg-white/10">🏠 <span>Dashboard</span></a></li>
+                <li><a href="analytics.html" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all opacity-80 hover:opacity-100 hover:bg-white/10">📊 <span>Analytics</span></a></li>
+                <li><a href="users.html" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all opacity-80 hover:opacity-100 hover:bg-white/10">👥 <span>Users</span></a></li>
+                <li><a href="leaderboard.html" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all opacity-80 hover:opacity-100 hover:bg-white/10">🏆 <span>Leaderboard</span></a></li>
+                <li><a href="notifications.html" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-white/20 font-bold shadow-inner">🔔 <span>Notifications</span></a></li>
+                <li><a href="settings.html" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all opacity-80 hover:opacity-100 hover:bg-white/10">⚙️ <span>Settings</span></a></li>
+            </ul>
         </div>
-        
-        <div class="form-row">
-            <div class="input-group">
-                <label>User ID</label>
-                <input type="number" id="userId" placeholder="Enter User ID">
-            </div>
-            
-            <div class="input-group">
-                <label>Source</label>
-                <select id="source">
-                    <option value="Solar">Solar</option>
-                    <option value="Wind">Wind</option>
-                    <option value="Hydro">Hydro</option>
-                    <option value="System">System</option>
-                </select>
-            </div>
-            
-            <div class="input-group" style="flex: 1;">
-                <label>Message</label>
-                <input type="text" id="message" placeholder="Enter details...">
-            </div>
-            
-            <button class="btn-send" onclick="sendNotification()">
-                📩 Send
-            </button>
+        <div class="p-4 border-t border-blue-700/30">
+            <button onclick="logout()" class="w-full bg-red-500/80 hover:bg-red-500 py-3 rounded-xl text-center font-bold transition-all shadow-lg shadow-red-900/20">🚪 Logout</button>
         </div>
+    </aside>
+
+    <div class="flex-1 flex flex-col overflow-y-auto">
+        <header class="bg-white dark:bg-gray-800 border-b dark:border-gray-700 px-8 py-4 flex items-center justify-between shadow-sm flex-shrink-0">
+            <div>
+                <h2 class="text-2xl font-bold text-gray-800 dark:text-white flex items-center gap-3">
+                    <span class="text-yellow-500">🔔</span> Notifications
+                </h2>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Broadcast updates or alerts to specific users</p>
+            </div>
+        </header>
+
+        <main class="p-8">
+            <div class="bg-white dark:bg-gray-800 p-10 rounded-2xl shadow-sm border dark:border-gray-700">
+                <h2 class="text-xl font-bold mb-8 flex items-center gap-3 text-blue-900 dark:text-blue-400">
+                    <span class="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">📢</span> 
+                    Send Notification to User
+                </h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 items-end">
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-gray-400 mb-2">User ID</label>
+                        <input type="number" id="userId" placeholder="Enter User ID" class="w-full p-4 bg-gray-50 dark:bg-gray-700 border dark:border-gray-600 rounded-xl outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-gray-400 mb-2">Source</label>
+                        <select id="source" class="w-full p-4 bg-gray-50 dark:bg-gray-700 border dark:border-gray-600 rounded-xl outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="Solar">Solar</option>
+                            <option value="Wind">Wind</option>
+                            <option value="Hydro">Hydro</option>
+                            <option value="System">System</option>
+                        </select>
+                    </div>
+                    
+                    <div class="md:col-span-1">
+                        <label class="block text-xs font-bold uppercase text-gray-400 mb-2">Message</label>
+                        <input type="text" id="message" placeholder="Enter details..." class="w-full p-4 bg-gray-50 dark:bg-gray-700 border dark:border-gray-600 rounded-xl outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    
+                    <button class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-xl shadow-lg shadow-blue-900/20 transition-all transform hover:-translate-y-1" onclick="sendNotification()">
+                        📩 Send Notification
+                    </button>
+                </div>
+            </div>
+        </main>
     </div>
-</div>
 
 <script>
 const API = 'https://repm-project-production.up.railway.app';
@@ -110,7 +112,7 @@ async function sendNotification() {
             document.getElementById('message').value = '';
         } else {
             const err = await res.json();
-            alert("Error: " + (err.message || "Failed to send"));
+            alert("Failed to send: " + (err.message || "Unknown error"));
         }
     } catch (e) {
         alert("Error connecting to server");
