@@ -365,7 +365,7 @@
             const payload = { username, password, fullName, email, phone, dob: dob || null, address, gender: gender || null, sources: selected };
 
             try {
-                const res = await fetch('/api/auth/register', {
+                const res = await fetch('https://repm-project-production.up.railway.app/api/auth/register', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
