@@ -52,9 +52,9 @@
     <div style="padding: 10px 25px; font-size: 22px; font-weight: bold; color: var(--primary);">⚡ REPM Mail</div>
     <div style="margin-bottom: 20px;"></div>
 
-    <div class="sidebar-item active" onclick="loadTab('INBOX', this)">📥 Inbox</div>
-    <div class="sidebar-item" onclick="loadTab('SENT', this)">📤 Sent Messages</div>
+    <div class="sidebar-item active" onclick="loadTab('INBOX', this)">💬 Admin Messages</div>
     <div class="sidebar-item" onclick="loadTab('ALERTS', this)">⚡ System Alerts</div>
+    <div class="sidebar-item" onclick="loadTab('SENT', this)">📤 Sent Messages</div>
     
     <div style="margin-top: auto; padding: 20px;">
         <div class="sidebar-item" onclick="window.location.href='dashboard.html'">🏠 Back to Dashboard</div>
@@ -152,9 +152,9 @@ function renderList() {
     }
     tbody.innerHTML = allMessages.map(m => `
         <tr class="msg-row ${!m.isRead && currentTab==='INBOX' ? 'unread' : ''}" onclick="viewMessage(${m.id})">
-            <td class="msg-sender">${currentTab==='SENT' ? 'To: Admin' : (m.senderUsername || 'System')}</td>
+            <td class="msg-sender">${currentTab==='SENT' ? 'To: Admin' : (m.senderUsername || 'Admin')}</td>
             <td class="msg-subject">
-                <span style="color:#5f6368">[${m.source}]</span> ${m.message.substring(0, 60)}${m.message.length > 60 ? '...' : ''}
+                <span style="color:#1a73e8; font-weight:bold;">[${m.source}]</span> ${m.message.substring(0, 60)}${m.message.length > 60 ? '...' : ''}
             </td>
             <td class="msg-time">${formatDate(m.timestamp)}</td>
         </tr>
@@ -175,12 +175,12 @@ function viewMessage(id) {
     document.getElementById('listView').style.display = 'none';
     document.getElementById('detailView').style.display = 'block';
     
-    document.getElementById('viewSubject').textContent = `${currentMsg.source} Notification`;
-    document.getElementById('viewSender').textContent = currentMsg.senderUsername || 'System';
+    document.getElementById('viewSubject').textContent = currentMsg.type === 'AUTO' ? 'System Alert' : 'Message from Admin';
+    document.getElementById('viewSender').textContent = currentMsg.senderUsername || (currentMsg.type === 'AUTO' ? 'System' : 'Admin');
     document.getElementById('viewEmail').textContent = currentTab === 'SENT' ? '<admin@repm.com>' : '';
     document.getElementById('viewTime').textContent = new Date(currentMsg.timestamp).toLocaleString();
     document.getElementById('viewBody').textContent = currentMsg.message;
-    document.getElementById('senderInitial').textContent = (currentMsg.senderUsername || 'S')[0].toUpperCase();
+    document.getElementById('senderInitial').textContent = (document.getElementById('viewSender').textContent)[0].toUpperCase();
     
     // Only show reply for Admin messages in Inbox
     if (currentTab === 'INBOX' && currentMsg.type === 'ADMIN_TO_USER') {
