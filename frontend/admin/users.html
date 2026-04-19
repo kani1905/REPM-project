@@ -4,6 +4,14 @@
     <title>Manage Users - REPM Admin</title>
     <meta charset="UTF-8">
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: #475569; }
+        .animate-in { animation: fadeIn 0.3s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
 </head>
 <body class="flex h-screen bg-gray-50 dark:bg-gray-900 dark:text-white overflow-hidden text-base">
 
@@ -34,261 +42,249 @@
         </div>
     </aside>
 
-    <div class="flex-1 flex flex-col overflow-y-auto">
-        <header class="bg-white dark:bg-gray-800 border-b dark:border-gray-700 px-8 py-4 flex items-center justify-between shadow-sm flex-shrink-0">
+    <div class="flex-1 flex flex-col overflow-hidden">
+        <header class="bg-white dark:bg-gray-800 border-b dark:border-gray-700 px-8 py-5 flex items-center justify-between shadow-sm flex-shrink-0 z-40">
             <div>
                 <h2 class="text-2xl font-bold text-gray-800 dark:text-white">👥 User Management</h2>
-                <p class="text-sm text-gray-500 dark:text-gray-400">View and manage all registered platform users</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Manage communication and profiles in one place</p>
             </div>
+            <button onclick="location.reload()" class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-all">🔄</button>
         </header>
 
-        <main class="p-8 space-y-8">
-            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border dark:border-gray-700 overflow-hidden">
-                <div class="p-6 border-b dark:border-gray-700 flex justify-between items-center">
-                    <h2 class="text-xl font-bold text-gray-800 dark:text-white">👥 Registered Users</h2>
+        <main class="flex-1 overflow-y-auto p-8 space-y-10 custom-scrollbar">
+            
+            <!-- Registered Users Table -->
+            <section class="bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-xl shadow-gray-200/50 dark:shadow-none border border-gray-100 dark:border-gray-700 overflow-hidden">
+                <div class="p-8 border-b dark:border-gray-700 flex justify-between items-center bg-gray-50/50 dark:bg-gray-800/50">
+                    <h2 class="text-xl font-black text-gray-800 dark:text-white uppercase tracking-tight">👥 Registered Users</h2>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="w-full text-left">
-                        <thead class="bg-gray-50 dark:bg-gray-700 text-gray-500 uppercase text-[10px] font-bold">
+                        <thead class="bg-gray-50 dark:bg-gray-900/50 text-gray-400 uppercase text-[10px] font-black tracking-widest">
                             <tr>
-                                <th class="p-4">ID</th>
-                                <th class="p-4">Full Name</th>
-                                <th class="p-4">Contact Details</th>
-                                <th class="p-4">Address</th>
-                                <th class="p-4">Energy Sources</th>
-                                <th class="p-4">Action</th>
+                                <th class="p-6">ID</th>
+                                <th class="p-6">Full Name</th>
+                                <th class="p-6">Contact Details</th>
+                                <th class="p-6">Action</th>
                             </tr>
                         </thead>
                         <tbody id="userRows" class="divide-y dark:divide-gray-700">
-                            <tr><td colspan="6" class="p-8 text-center text-gray-400">Loading users...</td></tr>
+                            <tr><td colspan="4" class="p-12 text-center text-gray-400 italic">Loading users...</td></tr>
                         </tbody>
                     </table>
                 </div>
+            </section>
+
+            <!-- Messaging Hub: Split View -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
+                
+                <!-- Send Direct Message -->
+                <section class="bg-white dark:bg-gray-800 p-8 rounded-[2.5rem] shadow-xl shadow-gray-200/50 dark:shadow-none border border-gray-100 dark:border-gray-700 flex flex-col">
+                    <h3 class="text-xs font-black uppercase text-blue-600 tracking-[0.2em] mb-6">📢 Direct Message</h3>
+                    <div class="space-y-6 flex-1">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-[10px] font-black uppercase text-gray-400 mb-2 tracking-widest">User ID</label>
+                                <input type="number" id="notifUserId" placeholder="Ex: 101" class="w-full p-4 bg-gray-50 dark:bg-gray-900 border dark:border-gray-700 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500 transition-all font-bold">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-black uppercase text-gray-400 mb-2 tracking-widest">Energy Source</label>
+                                <select id="notifSource" class="w-full p-4 bg-gray-50 dark:bg-gray-900 border dark:border-gray-700 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500 transition-all font-bold">
+                                    <option value="Solar">Solar</option>
+                                    <option value="Wind">Wind</option>
+                                    <option value="Hydro">Hydro</option>
+                                    <option value="General">General</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-black uppercase text-gray-400 mb-2 tracking-widest">Message Content</label>
+                            <textarea id="notifMessage" rows="4" placeholder="Type your instruction or alert here..." class="w-full p-4 bg-gray-50 dark:bg-gray-900 border dark:border-gray-700 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500 transition-all text-sm"></textarea>
+                        </div>
+                        <button onclick="sendNotif()" class="w-full bg-blue-900 hover:bg-blue-800 text-white font-black py-5 rounded-2xl transition-all shadow-xl shadow-blue-900/20 flex items-center justify-center gap-3">
+                            <span>🚀 Dispatch Message</span>
+                        </button>
+                    </div>
+                </section>
+
+                <!-- User Response Inbox -->
+                <section class="bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-xl shadow-gray-200/50 dark:shadow-none border border-gray-100 dark:border-gray-700 flex flex-col">
+                    <div class="p-8 border-b dark:border-gray-700 flex justify-between items-center">
+                        <h3 class="text-xs font-black uppercase text-gray-400 tracking-[0.2em]">📥 Incoming Responses</h3>
+                        <span id="unreadCount" class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-[10px] font-black uppercase">0 New</span>
+                    </div>
+                    <div id="userInbox" class="flex-1 overflow-y-auto max-h-[450px] custom-scrollbar divide-y divide-gray-50 dark:divide-gray-700">
+                        <p class="p-12 text-center text-gray-400 italic">Scanning for user feedback...</p>
+                    </div>
+                </section>
             </div>
 
-            <!-- ===== USER DETAIL MODAL ===== -->
-            <div id="detailModal" class="fixed inset-0 bg-blue-900/40 backdrop-blur-sm z-[100] hidden items-center justify-center p-4">
-                <div class="bg-white dark:bg-gray-900 w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300">
-                    <div class="p-6 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center">
-                        <h3 id="modalTitle" class="text-lg font-bold text-gray-800 dark:text-white">User Details</h3>
-                        <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600 transition-colors text-2xl">×</button>
-                    </div>
-                    <div id="modalContent" class="p-8">
-                        <!-- Content will be injected by JS -->
-                    </div>
+            <!-- Sent History Section -->
+            <section class="bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-xl shadow-gray-200/50 dark:shadow-none border border-gray-100 dark:border-gray-700 overflow-hidden">
+                <div class="p-8 border-b dark:border-gray-700">
+                    <h3 class="text-xs font-black uppercase text-gray-400 tracking-[0.2em]">📑 Notification Outbox</h3>
                 </div>
-            </div>
-
-            <div class="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-sm border dark:border-gray-700">
-                <h2 class="text-xl font-bold mb-6 flex items-center gap-2 text-blue-600">📢 Direct Notification</h2>
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 items-end">
-                    <div>
-                        <label class="block text-xs font-bold uppercase text-gray-400 mb-2">User ID</label>
-                        <input type="number" id="notifUserId" placeholder="User ID" class="w-full p-3 bg-gray-50 dark:bg-gray-700 border dark:border-gray-600 rounded-xl">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold uppercase text-gray-400 mb-2">Source</label>
-                        <select id="notifSource" class="w-full p-3 bg-gray-50 dark:bg-gray-700 border dark:border-gray-600 rounded-xl">
-                            <option value="Solar">Solar</option>
-                            <option value="Wind">Wind</option>
-                            <option value="Hydro">Hydro</option>
-                        </select>
-                    </div>
-                    <div class="md:col-span-1">
-                        <label class="block text-xs font-bold uppercase text-gray-400 mb-2">Message</label>
-                        <input type="text" id="notifMessage" placeholder="Enter message" class="w-full p-3 bg-gray-50 dark:bg-gray-700 border dark:border-gray-600 rounded-xl">
-                    </div>
-                    <button class="bg-blue-900 hover:bg-blue-800 text-white font-bold py-3 px-6 rounded-xl transition-all shadow-lg shadow-blue-900/20" onclick="sendNotif()">🚀 Send Now</button>
-                </div>
-            </div>
-
-            <!-- ===== SENT HISTORY SECTION ===== -->
-            <div class="mt-8 bg-white dark:bg-gray-800 p-8 rounded-3xl shadow-xl shadow-gray-200/50 dark:shadow-none border border-gray-100 dark:border-gray-700 overflow-hidden fade-in">
-                <div class="flex justify-between items-center mb-6">
-                    <h3 class="font-bold text-gray-800 dark:text-white flex items-center gap-2 text-lg">📑 Recently Sent Notifications</h3>
-                    <span id="notifCount" class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-[10px] font-bold uppercase tracking-wider">0 Sent</span>
-                </div>
-                <div class="overflow-x-auto rounded-2xl border border-gray-100 dark:border-gray-700">
-                    <table class="w-full text-left border-collapse">
-                        <thead>
-                            <tr class="bg-gray-50/50 dark:bg-gray-800/50 text-[10px] uppercase tracking-widest text-gray-400 font-bold border-b border-gray-100 dark:border-gray-700">
-                                <th class="p-4">Recipient ID</th>
-                                <th class="p-4">Energy Source</th>
-                                <th class="p-4">Message Content</th>
-                                <th class="p-4 text-right">Status</th>
-                            </tr>
-                        </thead>
-                        <tbody id="sentNotifRows" class="text-sm">
-                            <tr><td colspan="4" class="p-12 text-center text-gray-400 italic">No notifications sent in this session.</td></tr>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <tbody id="sentNotifRows" class="text-sm divide-y dark:divide-gray-700">
+                            <tr><td class="p-12 text-center text-gray-400 italic">No messages sent this session.</td></tr>
                         </tbody>
                     </table>
                 </div>
-            </div>
+            </section>
+
         </main>
     </div>
 
-<script>
-const API = 'https://repm-project-production.up.railway.app';
+    <!-- Modal for User Detail -->
+    <div id="detailModal" class="fixed inset-0 bg-blue-900/40 backdrop-blur-md z-[100] hidden items-center justify-center p-4">
+        <div class="bg-white dark:bg-gray-900 w-full max-w-lg rounded-[2.5rem] shadow-2xl overflow-hidden animate-in">
+            <div id="modalContent" class="p-10"></div>
+        </div>
+    </div>
 
-async function logout() {
-    await fetch(`${API}/logout`, { credentials: 'include', method: 'POST' });
-    window.location.href = '../login.html';
-}
+    <script>
+        const API = 'https://repm-project-production.up.railway.app';
 
-async function loadUsers() {
-    try {
-        const res = await fetch(`${API}/admin/users`, { credentials: 'include' });
-        if (res.status === 401 || res.status === 403) { window.location.href = '../login.html'; return; }
-        const users = await res.json();
-        const tbody = document.getElementById('userRows');
-        
-        // Filter to show only ROLE_USER if needed, or all.
-        // The user asked for "registered user", likely excluding ADMIN.
-        const registeredUsers = users.filter(u => u.role === 'USER');
-
-        if (!registeredUsers || registeredUsers.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="6" class="p-8 text-center text-gray-400">No registered users found.</td></tr>';
-            return;
+        async function logout() {
+            await fetch(`${API}/logout`, { credentials: 'include', method: 'POST' });
+            window.location.href = '../login.html';
         }
 
-        tbody.innerHTML = registeredUsers.map(u => {
-            const sources = (u.allowedSources || 'Solar, Wind, Hydro').split(',').map(s => {
-                const name = s.trim().toUpperCase();
-                let color = 'bg-blue-100 text-blue-700';
-                if (name.includes('SOLAR')) color = 'bg-orange-100 text-orange-700';
-                if (name.includes('WIND')) color = 'bg-emerald-100 text-emerald-700';
-                if (name.includes('HYDRO')) color = 'bg-cyan-100 text-cyan-700';
-                return `<span class="px-2 py-1 ${color} rounded text-[10px] font-bold mr-1 uppercase shadow-sm">${name}</span>`;
-            }).join('');
+        async function loadUsers() {
+            try {
+                const res = await fetch(`${API}/admin/users`, { credentials: 'include' });
+                const users = await res.json();
+                const tbody = document.getElementById('userRows');
+                const registeredUsers = users.filter(u => u.role === 'USER');
 
-            return `
-            <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors border-b border-gray-100 dark:border-gray-800">
-                <td class="p-4 text-gray-400 font-mono text-xs">#${u.id}</td>
-                <td class="p-4">
-                    <div class="font-bold text-gray-800 dark:text-white">${u.fullName || u.username}</div>
-                    <div class="text-[10px] text-gray-400 font-medium">@${u.username}</div>
-                </td>
-                <td class="p-4">
-                    <div class="text-sm font-semibold text-gray-700 dark:text-gray-300">${u.email}</div>
-                    <div class="text-[11px] text-gray-500">${u.phone || 'No Contact'}</div>
-                </td>
-                <td class="p-4 text-gray-500 text-xs italic truncate max-w-[150px]">${u.address || 'Not Provided'}</td>
-                <td class="p-4">${sources}</td>
-                <td class="p-4">
-                    <button class="bg-white dark:bg-gray-800 hover:bg-blue-600 hover:text-white text-blue-600 border border-blue-200 dark:border-blue-900/50 px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-sm hover:shadow-md flex items-center gap-2" onclick="viewDetails(${u.id})">
-                        🔍 View Full Details
-                    </button>
-                </td>
-            </tr>`;
-        }).join('');
-    } catch(e) { console.error('Error loading users:', e); }
-}
+                tbody.innerHTML = registeredUsers.map(u => `
+                <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-all border-b border-gray-100 dark:border-gray-800">
+                    <td class="p-6 text-gray-400 font-black text-xs">#${u.id}</td>
+                    <td class="p-6">
+                        <div class="font-black text-gray-800 dark:text-white">@${u.username}</div>
+                        <div class="text-[10px] text-blue-500 font-bold uppercase tracking-widest">${u.fullName || 'Anonymous'}</div>
+                    </td>
+                    <td class="p-6">
+                        <div class="text-sm font-bold text-gray-700 dark:text-gray-300">${u.email}</div>
+                        <div class="text-[10px] text-gray-400 font-medium">${u.phone || 'No phone'}</div>
+                    </td>
+                    <td class="p-6">
+                        <button onclick="viewDetails(${u.id})" class="px-4 py-2 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-600 hover:text-white transition-all">🔍 Details</button>
+                    </td>
+                </tr>`).join('');
+            } catch(e) { console.error('Error loading users:', e); }
+        }
 
-function viewDetails(userId) {
-    // We'll fetch or find the user object to show in the modal
-    fetch(`${API}/admin/users`, { credentials: 'include' })
-        .then(res => res.json())
-        .then(users => {
+        async function loadInbox() {
+            try {
+                const res = await fetch(`${API}/admin/notifications/all`, { credentials: 'include' });
+                const all = await res.json();
+                const userMessages = all.filter(n => n.type === 'USER_TO_ADMIN');
+                
+                const inbox = document.getElementById('userInbox');
+                document.getElementById('unreadCount').innerText = `${userMessages.length} Messages`;
+                
+                if (userMessages.length === 0) {
+                    inbox.innerHTML = '<p class="p-12 text-center text-gray-400 italic">No incoming user messages.</p>';
+                    return;
+                }
+
+                inbox.innerHTML = userMessages.reverse().map(m => `
+                    <div class="p-6 hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-all group">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="font-black text-blue-600">@${m.senderUsername}</span>
+                            <span class="text-[9px] font-bold text-gray-400 uppercase">${new Date(m.timestamp).toLocaleString()}</span>
+                        </div>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">${m.message}</p>
+                        <div class="mt-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button onclick="setRecipient(${m.senderUsername === 'admin' ? '' : `'${m.senderUsername}'`})" class="text-[9px] font-black uppercase text-blue-500 hover:underline">Quick Reply</button>
+                        </div>
+                    </div>
+                `).join('');
+            } catch(e) { console.error('Error loading inbox:', e); }
+        }
+
+        async function viewDetails(userId) {
+            const res = await fetch(`${API}/admin/users`, { credentials: 'include' });
+            const users = await res.json();
             const u = users.find(user => user.id === userId);
             if (!u) return;
 
-            document.getElementById('modalTitle').innerText = `Profile: ${u.fullName || u.username}`;
             document.getElementById('modalContent').innerHTML = `
-                <div class="space-y-6">
-                    <div class="flex items-center gap-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-2xl border border-blue-100 dark:border-blue-900/50">
-                        <div class="w-16 h-16 bg-blue-900 text-white rounded-full flex items-center justify-center text-2xl font-bold">
-                            ${(u.fullName || u.username).charAt(0).toUpperCase()}
+                <div class="space-y-8">
+                    <div class="flex items-center gap-6">
+                        <div class="w-20 h-20 bg-blue-900 text-white rounded-3xl flex items-center justify-center text-3xl font-black shadow-xl shadow-blue-900/20">
+                            ${u.username.charAt(0).toUpperCase()}
                         </div>
                         <div>
-                            <h3 class="text-xl font-bold text-gray-900 dark:text-white">${u.fullName || 'Registered User'}</h3>
-                            <p class="text-blue-600 dark:text-blue-400 font-medium text-sm">@${u.username} • User ID: #${u.id}</p>
+                            <h3 class="text-2xl font-black text-gray-900 dark:text-white">@${u.username}</h3>
+                            <p class="text-blue-600 font-bold uppercase tracking-widest text-xs">${u.fullName || 'Registered User'}</p>
                         </div>
                     </div>
-
-                    <div class="grid grid-cols-2 gap-4 text-sm">
-                        <div class="p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-100 dark:border-gray-800">
-                            <p class="text-gray-400 text-[10px] uppercase tracking-widest font-bold mb-1">Email Address</p>
-                            <p class="font-semibold text-gray-700 dark:text-gray-200">${u.email}</p>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="p-5 bg-gray-50 dark:bg-gray-800 rounded-3xl border border-gray-100 dark:border-gray-700">
+                            <p class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Email</p>
+                            <p class="text-sm font-bold truncate">${u.email}</p>
                         </div>
-                        <div class="p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-100 dark:border-gray-800">
-                            <p class="text-gray-400 text-[10px] uppercase tracking-widest font-bold mb-1">Phone Number</p>
-                            <p class="font-semibold text-gray-700 dark:text-gray-200">${u.phone || 'N/A'}</p>
-                        </div>
-                        <div class="p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-100 dark:border-gray-800 col-span-2">
-                            <p class="text-gray-400 text-[10px] uppercase tracking-widest font-bold mb-1">Registration Address</p>
-                            <p class="font-semibold text-gray-700 dark:text-gray-200">${u.address || 'No address provided in profile.'}</p>
+                        <div class="p-5 bg-gray-50 dark:bg-gray-800 rounded-3xl border border-gray-100 dark:border-gray-700">
+                            <p class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Phone</p>
+                            <p class="text-sm font-bold">${u.phone || 'N/A'}</p>
                         </div>
                     </div>
-
-                    <div class="p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-100 dark:border-gray-800">
-                        <p class="text-gray-400 text-[10px] uppercase tracking-widest font-bold mb-2">Energy Access Rights</p>
-                        <div class="flex gap-2">
-                            ${(u.allowedSources || 'Solar, Wind, Hydro').split(',').map(s => `<span class="px-3 py-1 bg-blue-900 text-white rounded-lg text-[10px] font-bold uppercase">${s.trim()}</span>`).join('')}
-                        </div>
+                    <div class="p-5 bg-gray-50 dark:bg-gray-800 rounded-3xl border border-gray-100 dark:border-gray-700">
+                        <p class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Address</p>
+                        <p class="text-sm font-bold">${u.address || 'No address provided.'}</p>
                     </div>
-
-                    <div class="flex gap-3 pt-4">
-                        <button onclick="closeModal()" class="flex-1 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 py-3 rounded-xl font-bold transition-all">Close</button>
-                        <button onclick="alert('Sending direct message to ${u.username}...') " class="flex-1 bg-blue-900 text-white py-3 rounded-xl font-bold shadow-lg shadow-blue-900/20 transition-all hover:scale-[1.02]">Contact User</button>
+                    <div class="flex gap-4 pt-4">
+                        <button onclick="closeModal()" class="flex-1 bg-gray-100 dark:bg-gray-800 text-gray-500 py-4 rounded-2xl font-black uppercase text-xs tracking-widest">Close</button>
+                        <button onclick="setRecipientId(${u.id}); closeModal();" class="flex-1 bg-blue-900 text-white py-4 rounded-2xl font-black uppercase text-xs tracking-widest shadow-xl shadow-blue-900/20">Message User</button>
                     </div>
                 </div>
             `;
             document.getElementById('detailModal').classList.remove('hidden');
             document.getElementById('detailModal').classList.add('flex');
-        });
-}
+        }
 
-function closeModal() {
-    document.getElementById('detailModal').classList.add('hidden');
-    document.getElementById('detailModal').classList.remove('flex');
-}
+        function closeModal() { document.getElementById('detailModal').classList.add('hidden'); document.getElementById('detailModal').classList.remove('flex'); }
+        function setRecipientId(id) { document.getElementById('notifUserId').value = id; document.getElementById('notifMessage').focus(); }
 
-let sentCount = 0;
-async function sendNotif() {
-    const userId = document.getElementById('notifUserId').value;
-    const message = document.getElementById('notifMessage').value;
-    const source = document.getElementById('notifSource').value;
-    if (!userId || !message) { alert('Please fill all fields'); return; }
-    
-    try {
-        const res = await fetch(`${API}/admin/notify`, { credentials: 'include',
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-            body: JSON.stringify({ userId, message, source })
-        });
-        const data = await res.json();
-        
-        // Add to history table
-        const tbody = document.getElementById('sentNotifRows');
-        if (sentCount === 0) tbody.innerHTML = ''; // Clear empty state
-        
-        const newRow = `
-            <tr class="border-b border-gray-50 dark:border-gray-800/50 hover:bg-gray-50/50 dark:hover:bg-gray-800/20 transition-all">
-                <td class="p-4 font-bold text-blue-600">#${userId}</td>
-                <td class="p-4">
-                    <span class="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded text-[10px] font-bold uppercase">${source}</span>
-                </td>
-                <td class="p-4 text-gray-600 dark:text-gray-400">${message}</td>
-                <td class="p-4 text-right">
-                    <span class="px-2 py-1 bg-emerald-100 text-emerald-700 rounded text-[10px] font-bold">✅ SENT</span>
-                </td>
-            </tr>
-        `;
-        tbody.insertAdjacentHTML('afterbegin', newRow);
-        
-        sentCount++;
-        document.getElementById('notifCount').innerText = `${sentCount} Sent`;
-        
-        // Clear inputs
-        document.getElementById('notifUserId').value = '';
-        document.getElementById('notifMessage').value = '';
-        
-        alert(data.message || 'Notification Sent Successfully!');
-    } catch(e) { alert('Error sending notification'); }
-}
+        let sentCount = 0;
+        async function sendNotif() {
+            const userId = document.getElementById('notifUserId').value;
+            const message = document.getElementById('notifMessage').value;
+            const source = document.getElementById('notifSource').value;
+            if (!userId || !message) { alert('Fill all fields'); return; }
 
-loadUsers();
-</script>
+            try {
+                const res = await fetch(`${API}/admin/notify`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ userId, message, source })
+                });
+                const data = await res.json();
+                
+                const tbody = document.getElementById('sentNotifRows');
+                if (sentCount === 0) tbody.innerHTML = '';
+                
+                tbody.insertAdjacentHTML('afterbegin', `
+                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/20 transition-all border-b border-gray-100 dark:border-gray-700">
+                        <td class="p-6 font-black text-blue-600 text-xs">#${userId}</td>
+                        <td class="p-6"><span class="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded text-[9px] font-black uppercase tracking-widest">${source}</span></td>
+                        <td class="p-6 text-xs text-gray-600 dark:text-gray-400">${message}</td>
+                        <td class="p-6 text-right"><span class="text-[9px] font-black text-emerald-500 uppercase tracking-widest">✅ Dispatched</span></td>
+                    </tr>
+                `);
+                sentCount++;
+                document.getElementById('notifUserId').value = '';
+                document.getElementById('notifMessage').value = '';
+                alert('Message Sent!');
+            } catch(e) { alert('Error sending message'); }
+        }
+
+        loadUsers();
+        loadInbox();
+    </script>
 </body>
 </html>

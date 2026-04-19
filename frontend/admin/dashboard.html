@@ -105,7 +105,7 @@
                                 <div class="w-14 h-14 bg-orange-400 text-white rounded-2xl flex items-center justify-center text-2xl shadow-lg shadow-orange-200 dark:shadow-none group-hover:rotate-12 transition-transform">☀️</div>
                                 <span class="text-[10px] font-bold text-orange-600 uppercase tracking-widest bg-orange-100 px-3 py-1 rounded-full">Solar</span>
                             </div>
-                            <h3 class="text-2xl font-black text-gray-800 dark:text-white mb-6">Photovoltaic Stats</h3>
+                            <h3 class="text-2xl font-black text-gray-800 dark:text-white mb-6">Solar Performance</h3>
                             <div class="space-y-4 flex-1">
                                 <div class="flex justify-between items-center p-4 bg-white/60 dark:bg-gray-900/40 backdrop-blur-md rounded-2xl border border-white dark:border-gray-700 shadow-sm">
                                     <span class="text-xs font-bold text-gray-400 uppercase tracking-tighter">Efficiency</span>
@@ -130,7 +130,7 @@
                                 <div class="w-14 h-14 bg-emerald-400 text-white rounded-2xl flex items-center justify-center text-2xl shadow-lg shadow-emerald-200 dark:shadow-none group-hover:rotate-12 transition-transform">💨</div>
                                 <span class="text-[10px] font-bold text-emerald-600 uppercase tracking-widest bg-emerald-100 px-3 py-1 rounded-full">Wind</span>
                             </div>
-                            <h3 class="text-2xl font-black text-gray-800 dark:text-white mb-6">Kinetic Stats</h3>
+                            <h3 class="text-2xl font-black text-gray-800 dark:text-white mb-6">Wind Performance</h3>
                             <div class="space-y-4 flex-1">
                                 <div class="flex justify-between items-center p-4 bg-white/60 dark:bg-gray-900/40 backdrop-blur-md rounded-2xl border border-white dark:border-gray-700 shadow-sm">
                                     <span class="text-xs font-bold text-gray-400 uppercase tracking-tighter">Efficiency</span>
@@ -155,7 +155,7 @@
                                 <div class="w-14 h-14 bg-cyan-400 text-white rounded-2xl flex items-center justify-center text-2xl shadow-lg shadow-cyan-200 dark:shadow-none group-hover:rotate-12 transition-transform">💧</div>
                                 <span class="text-[10px] font-bold text-cyan-600 uppercase tracking-widest bg-cyan-100 px-3 py-1 rounded-full">Hydro</span>
                             </div>
-                            <h3 class="text-2xl font-black text-gray-800 dark:text-white mb-6">Potential Stats</h3>
+                            <h3 class="text-2xl font-black text-gray-800 dark:text-white mb-6">Hydro Performance</h3>
                             <div class="space-y-4 flex-1">
                                 <div class="flex justify-between items-center p-4 bg-white/60 dark:bg-gray-900/40 backdrop-blur-md rounded-2xl border border-white dark:border-gray-700 shadow-sm">
                                     <span class="text-xs font-bold text-gray-400 uppercase tracking-tighter">Efficiency</span>
@@ -171,18 +171,6 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div>
-            </section>
-            <!-- User Feedback Inbox -->
-            <section>
-                <div class="flex justify-between items-center mb-6">
-                    <h3 class="text-xs font-black uppercase text-gray-400 tracking-[0.2em]">📥 Recent User Responses</h3>
-                    <span id="unreadCount" class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-[10px] font-bold uppercase tracking-wider">0 New</span>
-                </div>
-                <div class="bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-xl shadow-gray-200/50 dark:shadow-none border border-gray-100 dark:border-gray-700 overflow-hidden">
-                    <div id="userInbox" class="divide-y divide-gray-50 dark:divide-gray-700">
-                        <p class="p-12 text-center text-gray-400 italic">No incoming user messages found.</p>
                     </div>
                 </div>
             </section>
@@ -220,28 +208,6 @@
                 document.getElementById('hydroEff').textContent = (d.hydroEff || 0).toFixed(2) + '%';
                 document.getElementById('hydroCO2').textContent = (d.hydroCO2 || 0).toFixed(2);
                 document.getElementById('hydroBill').textContent = '₹' + (d.hydroBill || 0).toFixed(2);
-
-                // Load User Messages
-                const nRes = await fetch(`${API}/admin/notifications/all`, { credentials: 'include' });
-                const allNotifs = await nRes.json();
-                const userMessages = allNotifs.filter(n => n.type === 'USER_TO_ADMIN');
-                
-                const inbox = document.getElementById('userInbox');
-                if (userMessages.length > 0) {
-                    document.getElementById('unreadCount').innerText = `${userMessages.length} Messages`;
-                    inbox.innerHTML = userMessages.reverse().map(m => `
-                        <div class="p-6 hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-all flex items-start gap-4">
-                            <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 rounded-2xl flex items-center justify-center text-xl shadow-sm flex-shrink-0">💬</div>
-                            <div class="flex-1">
-                                <div class="flex justify-between items-center mb-1">
-                                    <span class="font-black text-gray-800 dark:text-white">@${m.senderUsername}</span>
-                                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">${new Date(m.timestamp).toLocaleString()}</span>
-                                </div>
-                                <p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">${m.message}</p>
-                            </div>
-                        </div>
-                    `).join('');
-                }
             } catch(e) { console.error('Error loading dashboard:', e); }
         }
 

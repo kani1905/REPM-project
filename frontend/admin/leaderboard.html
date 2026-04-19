@@ -9,12 +9,6 @@
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: #475569; }
-        
-        .resource-card { transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
-        .card-expanded { grid-column: span 3; }
-        @media (max-width: 1024px) { .card-expanded { grid-column: span 1; } }
-        
-        .dimmed { opacity: 0.4; filter: grayscale(0.5); transform: scale(0.95); pointer-events: none; }
     </style>
 </head>
 <body class="flex h-screen bg-gray-50 dark:bg-gray-900 dark:text-white overflow-hidden text-base">
@@ -54,181 +48,101 @@
                     <span class="p-2 bg-yellow-400/10 text-yellow-600 rounded-lg text-xl">🏆</span>
                     Efficiency Leaderboard
                 </h2>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Click a card to expand detailed resource rankings</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Live rankings based on resource efficiency</p>
             </div>
             <button onclick="location.reload()" class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-all">🔄</button>
         </header>
 
         <main class="flex-1 overflow-y-auto p-8 custom-scrollbar">
-            <div id="leaderboardGrid" class="grid grid-cols-1 lg:grid-cols-3 gap-8 transition-all duration-500 ease-in-out">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 
-                <!-- Solar Spotlight Card -->
-                <div id="solarCard" onclick="expandResource('solar')" class="resource-card group cursor-pointer bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-xl shadow-gray-200/50 dark:shadow-none border border-gray-100 dark:border-gray-700 overflow-hidden border-t-[6px] border-t-orange-400">
+                <!-- Solar Leaders -->
+                <div class="bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-xl shadow-gray-200/50 dark:shadow-none border border-gray-100 dark:border-gray-700 overflow-hidden border-t-[6px] border-t-orange-400">
                     <div class="p-8 bg-gradient-to-br from-orange-50 to-white dark:from-orange-900/10 dark:to-gray-800">
                         <div class="flex justify-between items-start mb-6">
-                            <div class="w-14 h-14 bg-orange-400 text-white rounded-2xl flex items-center justify-center text-2xl shadow-lg shadow-orange-200 dark:shadow-none transition-transform group-hover:rotate-12">☀️</div>
-                            <span class="text-[10px] font-bold text-orange-600 uppercase tracking-widest bg-orange-100 px-3 py-1 rounded-full">Primary Source</span>
+                            <div class="w-14 h-14 bg-orange-400 text-white rounded-2xl flex items-center justify-center text-2xl shadow-lg shadow-orange-200 dark:shadow-none transition-transform hover:rotate-12 transition-all">☀️</div>
+                            <span class="text-[10px] font-bold text-orange-600 uppercase tracking-widest bg-orange-100 px-3 py-1 rounded-full">Solar</span>
                         </div>
-                        <h3 class="text-2xl font-black text-gray-800 dark:text-white mb-2">Solar Leaders</h3>
-                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">Highest photovoltaic efficiency conversion rates</p>
+                        <h3 class="text-2xl font-black text-gray-800 dark:text-white mb-6">Solar Rankings</h3>
                         
-                        <div id="solarPreview" class="space-y-3">
-                            <div class="p-4 bg-white/60 dark:bg-gray-900/40 backdrop-blur-md rounded-2xl border border-white dark:border-gray-700 flex justify-between items-center shadow-sm">
-                                <div class="flex items-center gap-3">
-                                    <span class="text-lg font-bold text-orange-500">1</span>
-                                    <span class="font-bold text-gray-700 dark:text-gray-200" id="solarTopUser">Loading...</span>
-                                </div>
-                                <span class="font-black text-blue-900 dark:text-blue-400" id="solarTopEff">-</span>
-                            </div>
-                        </div>
-
-                        <div id="solarExpanded" class="hidden mt-8 pt-8 border-t border-orange-100 dark:border-gray-700">
-                            <h4 class="text-xs font-bold uppercase tracking-widest text-orange-400 mb-4 text-center">Full Rankings</h4>
-                            <div class="overflow-x-auto">
-                                <table class="w-full text-left border-collapse">
-                                    <thead class="text-[10px] text-gray-400 uppercase font-bold border-b border-orange-50 dark:border-gray-700">
-                                        <tr><th class="pb-3">Rank</th><th class="pb-3">User</th><th class="pb-3 text-right">Eff.</th></tr>
-                                    </thead>
-                                    <tbody id="solarList" class="text-sm divide-y divide-orange-50/50 dark:divide-gray-700/50"></tbody>
-                                </table>
-                            </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead class="text-[10px] text-gray-400 uppercase font-bold border-b border-orange-50 dark:border-gray-700">
+                                    <tr><th class="pb-3">Rank</th><th class="pb-3">User</th><th class="pb-3 text-right">Eff.</th></tr>
+                                </thead>
+                                <tbody id="solarList" class="text-sm divide-y divide-orange-50/50 dark:divide-gray-700/50">
+                                    <tr><td colspan="3" class="p-8 text-center text-gray-400">Loading...</td></tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
 
-                <!-- Wind Spotlight Card -->
-                <div id="windCard" onclick="expandResource('wind')" class="resource-card group cursor-pointer bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-xl shadow-gray-200/50 dark:shadow-none border border-gray-100 dark:border-gray-700 overflow-hidden border-t-[6px] border-t-emerald-400">
+                <!-- Wind Leaders -->
+                <div class="bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-xl shadow-gray-200/50 dark:shadow-none border border-gray-100 dark:border-gray-700 overflow-hidden border-t-[6px] border-t-emerald-400">
                     <div class="p-8 bg-gradient-to-br from-emerald-50 to-white dark:from-emerald-900/10 dark:to-gray-800">
                         <div class="flex justify-between items-start mb-6">
-                            <div class="w-14 h-14 bg-emerald-400 text-white rounded-2xl flex items-center justify-center text-2xl shadow-lg shadow-emerald-200 dark:shadow-none transition-transform group-hover:rotate-12">💨</div>
-                            <span class="text-[10px] font-bold text-emerald-600 uppercase tracking-widest bg-emerald-100 px-3 py-1 rounded-full">Kinetic Power</span>
+                            <div class="w-14 h-14 bg-emerald-400 text-white rounded-2xl flex items-center justify-center text-2xl shadow-lg shadow-emerald-200 dark:shadow-none transition-transform hover:rotate-12 transition-all">💨</div>
+                            <span class="text-[10px] font-bold text-emerald-600 uppercase tracking-widest bg-emerald-100 px-3 py-1 rounded-full">Wind</span>
                         </div>
-                        <h3 class="text-2xl font-black text-gray-800 dark:text-white mb-2">Wind Leaders</h3>
-                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">Optimized turbine rotation and load balancing</p>
+                        <h3 class="text-2xl font-black text-gray-800 dark:text-white mb-6">Wind Rankings</h3>
                         
-                        <div id="windPreview" class="space-y-3">
-                            <div class="p-4 bg-white/60 dark:bg-gray-900/40 backdrop-blur-md rounded-2xl border border-white dark:border-gray-700 flex justify-between items-center shadow-sm">
-                                <div class="flex items-center gap-3">
-                                    <span class="text-lg font-bold text-emerald-500">1</span>
-                                    <span class="font-bold text-gray-700 dark:text-gray-200" id="windTopUser">Loading...</span>
-                                </div>
-                                <span class="font-black text-blue-900 dark:text-blue-400" id="windTopEff">-</span>
-                            </div>
-                        </div>
-
-                        <div id="windExpanded" class="hidden mt-8 pt-8 border-t border-emerald-100 dark:border-gray-700">
-                            <h4 class="text-xs font-bold uppercase tracking-widest text-emerald-400 mb-4 text-center">Full Rankings</h4>
-                            <div class="overflow-x-auto">
-                                <table class="w-full text-left border-collapse">
-                                    <thead class="text-[10px] text-gray-400 uppercase font-bold border-b border-emerald-50 dark:border-gray-700">
-                                        <tr><th class="pb-3">Rank</th><th class="pb-3">User</th><th class="pb-3 text-right">Eff.</th></tr>
-                                    </thead>
-                                    <tbody id="windList" class="text-sm divide-y divide-emerald-50/50 dark:divide-gray-700/50"></tbody>
-                                </table>
-                            </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead class="text-[10px] text-gray-400 uppercase font-bold border-b border-emerald-50 dark:border-gray-700">
+                                    <tr><th class="pb-3">Rank</th><th class="pb-3">User</th><th class="pb-3 text-right">Eff.</th></tr>
+                                </thead>
+                                <tbody id="windList" class="text-sm divide-y divide-emerald-50/50 dark:divide-gray-700/50">
+                                    <tr><td colspan="3" class="p-8 text-center text-gray-400">Loading...</td></tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
 
-                <!-- Hydro Spotlight Card -->
-                <div id="hydroCard" onclick="expandResource('hydro')" class="resource-card group cursor-pointer bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-xl shadow-gray-200/50 dark:shadow-none border border-gray-100 dark:border-gray-700 overflow-hidden border-t-[6px] border-t-cyan-400">
+                <!-- Hydro Leaders -->
+                <div class="bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-xl shadow-gray-200/50 dark:shadow-none border border-gray-100 dark:border-gray-700 overflow-hidden border-t-[6px] border-t-cyan-400">
                     <div class="p-8 bg-gradient-to-br from-cyan-50 to-white dark:from-cyan-900/10 dark:to-gray-800">
                         <div class="flex justify-between items-start mb-6">
-                            <div class="w-14 h-14 bg-cyan-400 text-white rounded-2xl flex items-center justify-center text-2xl shadow-lg shadow-cyan-200 dark:shadow-none transition-transform group-hover:rotate-12">💧</div>
-                            <span class="text-[10px] font-bold text-cyan-600 uppercase tracking-widest bg-cyan-100 px-3 py-1 rounded-full">Potential energy</span>
+                            <div class="w-14 h-14 bg-cyan-400 text-white rounded-2xl flex items-center justify-center text-2xl shadow-lg shadow-cyan-200 dark:shadow-none transition-transform hover:rotate-12 transition-all">💧</div>
+                            <span class="text-[10px] font-bold text-cyan-600 uppercase tracking-widest bg-cyan-100 px-3 py-1 rounded-full">Hydro</span>
                         </div>
-                        <h3 class="text-2xl font-black text-gray-800 dark:text-white mb-2">Hydro Leaders</h3>
-                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">Sustainable water flow and pressure management</p>
+                        <h3 class="text-2xl font-black text-gray-800 dark:text-white mb-6">Hydro Rankings</h3>
                         
-                        <div id="hydroPreview" class="space-y-3">
-                            <div class="p-4 bg-white/60 dark:bg-gray-900/40 backdrop-blur-md rounded-2xl border border-white dark:border-gray-700 flex justify-between items-center shadow-sm">
-                                <div class="flex items-center gap-3">
-                                    <span class="text-lg font-bold text-cyan-500">1</span>
-                                    <span class="font-bold text-gray-700 dark:text-gray-200" id="hydroTopUser">Loading...</span>
-                                </div>
-                                <span class="font-black text-blue-900 dark:text-blue-400" id="hydroTopEff">-</span>
-                            </div>
-                        </div>
-
-                        <div id="hydroExpanded" class="hidden mt-8 pt-8 border-t border-cyan-100 dark:border-gray-700">
-                            <h4 class="text-xs font-bold uppercase tracking-widest text-cyan-400 mb-4 text-center">Full Rankings</h4>
-                            <div class="overflow-x-auto">
-                                <table class="w-full text-left border-collapse">
-                                    <thead class="text-[10px] text-gray-400 uppercase font-bold border-b border-cyan-50 dark:border-gray-700">
-                                        <tr><th class="pb-3">Rank</th><th class="pb-3">User</th><th class="pb-3 text-right">Eff.</th></tr>
-                                    </thead>
-                                    <tbody id="hydroList" class="text-sm divide-y divide-cyan-50/50 dark:divide-gray-700/50"></tbody>
-                                </table>
-                            </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead class="text-[10px] text-gray-400 uppercase font-bold border-b border-cyan-50 dark:border-gray-700">
+                                    <tr><th class="pb-3">Rank</th><th class="pb-3">User</th><th class="pb-3 text-right">Eff.</th></tr>
+                                </thead>
+                                <tbody id="hydroList" class="text-sm divide-y divide-cyan-50/50 dark:divide-gray-700/50">
+                                    <tr><td colspan="3" class="p-8 text-center text-gray-400">Loading...</td></tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
+
             </div>
         </main>
     </div>
 
     <script>
         const API = 'https://repm-project-production.up.railway.app';
-        let expandedRes = null;
 
         async function logout() {
             await fetch(`${API}/logout`, { credentials: 'include', method: 'POST' });
             window.location.href = '../login.html';
         }
 
-        function expandResource(res) {
-            const grid = document.getElementById('leaderboardGrid');
-            const cards = ['solar', 'wind', 'hydro'];
-            
-            if (expandedRes === res) {
-                // Collapse
-                cards.forEach(c => {
-                    document.getElementById(`${c}Card`).classList.remove('card-expanded', 'dimmed');
-                    document.getElementById(`${c}Expanded`).classList.add('hidden');
-                });
-                expandedRes = null;
-                return;
-            }
-
-            // Expand
-            expandedRes = res;
-            cards.forEach(c => {
-                const card = document.getElementById(`${c}Card`);
-                const expanded = document.getElementById(`${c}Expanded`);
-                if (c === res) {
-                    card.classList.add('card-expanded');
-                    card.classList.remove('dimmed');
-                    expanded.classList.remove('hidden');
-                } else {
-                    card.classList.remove('card-expanded');
-                    card.classList.add('dimmed');
-                    expanded.classList.add('hidden');
-                }
-            });
-            
-            // Scroll to the card
-            document.getElementById(`${res}Card`).scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-
-        function renderLeaders(list, elementId, topUserId, topEffId) {
+        function renderLeaders(list, elementId) {
             const tbody = document.getElementById(elementId);
-            const topUser = document.getElementById(topUserId);
-            const topEff = document.getElementById(topEffId);
-
             if (!list || list.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="3" class="p-8 text-center text-gray-400">No data available</td></tr>';
-                topUser.innerText = 'N/A';
-                topEff.innerText = '0%';
+                tbody.innerHTML = '<tr><td colspan="3" class="p-8 text-center text-gray-400 italic">No data available</td></tr>';
                 return;
             }
 
-            // Top Performer
-            topUser.innerText = list[0].username;
-            topEff.innerText = `${(list[0].efficiency || 0).toFixed(2)}%`;
-
-            // Full List
             tbody.innerHTML = list.map((u, i) => `
-                <tr class="hover:bg-gray-50/50 dark:hover:bg-gray-700/30 transition-colors">
+                <tr class="hover:bg-gray-50/50 dark:hover:bg-gray-700/30 transition-all">
                     <td class="p-4 font-bold text-gray-400">${i+1}</td>
                     <td class="p-4 font-semibold text-gray-700 dark:text-gray-200">${u.username}</td>
                     <td class="p-4 text-right font-bold text-blue-600 dark:text-blue-400">${(u.efficiency||0).toFixed(2)}%</td>
@@ -241,9 +155,9 @@
                 if (res.status === 401 || res.status === 403) { window.location.href = '../login.html'; return; }
                 const d = await res.json();
                 
-                renderLeaders(d.solarLeaders, 'solarList', 'solarTopUser', 'solarTopEff');
-                renderLeaders(d.windLeaders, 'windList', 'windTopUser', 'windTopEff');
-                renderLeaders(d.hydroLeaders, 'hydroList', 'hydroTopUser', 'hydroTopEff');
+                renderLeaders(d.solarLeaders, 'solarList');
+                renderLeaders(d.windLeaders, 'windList');
+                renderLeaders(d.hydroLeaders, 'hydroList');
             } catch(e) { console.error('Error loading leaderboard:', e); }
         }
 
