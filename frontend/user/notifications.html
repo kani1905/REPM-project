@@ -115,20 +115,45 @@ async function fetchNotifications() {
         container.innerHTML = filtered.map(n => {
             let icon = '⚡';
             let colorClass = 'border-red-500';
+            let isActionable = false;
+
             if (n.message.toLowerCase().includes('excellent') || n.message.toLowerCase().includes('great')) {
                 icon = '✅';
                 colorClass = 'border-green-500';
             }
-            if (n.type.includes('ADMIN')) colorClass = 'border-blue-500';
+            if (n.type.includes('ADMIN')) {
+                colorClass = 'border-blue-500';
+                icon = '👤';
+                isActionable = true;
+            }
             
             return `
-                <div class="p-6 bg-gray-50 dark:bg-gray-700/30 rounded-xl border-l-4 ${colorClass} shadow-sm transition-all hover:translate-x-1">
-                    <div class="flex items-center gap-3 mb-2">
-                        <span class="text-xl">${icon}</span>
-                        <span class="font-bold text-gray-800 dark:text-white">${n.message}</span>
+                <div class="p-6 bg-gray-50 dark:bg-gray-700/30 rounded-2xl border-l-4 ${colorClass} shadow-sm transition-all hover:shadow-md">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div class="flex items-center gap-3">
+                            <span class="text-xl p-2 bg-white dark:bg-gray-800 rounded-lg shadow-sm">${icon}</span>
+                            <div>
+                                <span class="font-bold text-gray-800 dark:text-white block">${n.message}</span>
+                                <span class="text-[10px] text-gray-400 uppercase font-black tracking-widest mt-1 block">
+                                    ${n.source} • ${new Date(n.timestamp).toLocaleString()}
+                                </span>
+                            </div>
+                        </div>
+                        ${isActionable ? `
+                            <button onclick="toggleReply(${n.id})" class="px-4 py-2 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-xl text-xs font-bold hover:bg-blue-600 hover:text-white transition-all">
+                                💬 Reply
+                            </button>
+                        ` : ''}
                     </div>
-                    <div class="text-[10px] text-gray-400 uppercase font-bold tracking-widest ml-8">
-                        Source: ${n.source} • ${new Date(n.timestamp).toLocaleString()}
+
+                    <!-- Reply Form (Hidden) -->
+                    <div id="replyBox-${n.id}" class="hidden mt-6 pt-6 border-t border-blue-50 dark:border-gray-700 animate-in slide-in-from-top-2 duration-300">
+                        <textarea id="replyText-${n.id}" placeholder="Type your response to administrator..." 
+                                  class="w-full p-4 bg-white dark:bg-gray-800 border dark:border-gray-600 rounded-2xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all" rows="3"></textarea>
+                        <div class="flex justify-end mt-3 gap-3">
+                            <button onclick="toggleReply(${n.id})" class="px-4 py-2 text-gray-400 text-xs font-bold">Cancel</button>
+                            <button onclick="sendReply(${n.id})" class="px-6 py-2 bg-blue-600 text-white rounded-xl text-xs font-bold shadow-lg shadow-blue-600/20 hover:scale-105 transition-all">Send Reply</button>
+                        </div>
                     </div>
                 </div>
             `;
@@ -137,6 +162,30 @@ async function fetchNotifications() {
     } catch (e) {
         container.innerHTML = '<p class="text-center py-10 text-red-500 font-bold">Error loading notifications. Please try again.</p>';
     }
+}
+
+function toggleReply(id) {
+    const box = document.getElementById(`replyBox-${id}`);
+    box.classList.toggle('hidden');
+}
+
+async function sendReply(parentId) {
+    const text = document.getElementById(`replyText-${parentId}`).value;
+    if (!text) return alert('Please enter a message');
+
+    try {
+        const res = await fetch(`${API}/user/notifications/reply`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ parentId, message: text })
+        });
+        if (res.ok) {
+            alert('Reply sent to Administrator');
+            toggleReply(parentId);
+            document.getElementById(`replyText-${parentId}`).value = '';
+        }
+    } catch (e) { alert('Failed to send reply'); }
 }
 
 fetchNotifications();

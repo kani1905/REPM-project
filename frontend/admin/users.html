@@ -66,6 +66,19 @@
                 </div>
             </div>
 
+            <!-- ===== USER DETAIL MODAL ===== -->
+            <div id="detailModal" class="fixed inset-0 bg-blue-900/40 backdrop-blur-sm z-[100] hidden items-center justify-center p-4">
+                <div class="bg-white dark:bg-gray-900 w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300">
+                    <div class="p-6 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center">
+                        <h3 id="modalTitle" class="text-lg font-bold text-gray-800 dark:text-white">User Details</h3>
+                        <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600 transition-colors text-2xl">×</button>
+                    </div>
+                    <div id="modalContent" class="p-8">
+                        <!-- Content will be injected by JS -->
+                    </div>
+                </div>
+            </div>
+
             <div class="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-sm border dark:border-gray-700">
                 <h2 class="text-xl font-bold mb-6 flex items-center gap-2 text-blue-600">📢 Direct Notification</h2>
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-6 items-end">
@@ -85,7 +98,30 @@
                         <label class="block text-xs font-bold uppercase text-gray-400 mb-2">Message</label>
                         <input type="text" id="notifMessage" placeholder="Enter message" class="w-full p-3 bg-gray-50 dark:bg-gray-700 border dark:border-gray-600 rounded-xl">
                     </div>
-                    <button class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl transition-all shadow-lg shadow-blue-900/20" onclick="sendNotif()">Send Now</button>
+                    <button class="bg-blue-900 hover:bg-blue-800 text-white font-bold py-3 px-6 rounded-xl transition-all shadow-lg shadow-blue-900/20" onclick="sendNotif()">🚀 Send Now</button>
+                </div>
+            </div>
+
+            <!-- ===== SENT HISTORY SECTION ===== -->
+            <div class="mt-8 bg-white dark:bg-gray-800 p-8 rounded-3xl shadow-xl shadow-gray-200/50 dark:shadow-none border border-gray-100 dark:border-gray-700 overflow-hidden fade-in">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="font-bold text-gray-800 dark:text-white flex items-center gap-2 text-lg">📑 Recently Sent Notifications</h3>
+                    <span id="notifCount" class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-[10px] font-bold uppercase tracking-wider">0 Sent</span>
+                </div>
+                <div class="overflow-x-auto rounded-2xl border border-gray-100 dark:border-gray-700">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-gray-50/50 dark:bg-gray-800/50 text-[10px] uppercase tracking-widest text-gray-400 font-bold border-b border-gray-100 dark:border-gray-700">
+                                <th class="p-4">Recipient ID</th>
+                                <th class="p-4">Energy Source</th>
+                                <th class="p-4">Message Content</th>
+                                <th class="p-4 text-right">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="sentNotifRows" class="text-sm">
+                            <tr><td colspan="4" class="p-12 text-center text-gray-400 italic">No notifications sent in this session.</td></tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </main>
@@ -116,26 +152,31 @@ async function loadUsers() {
         }
 
         tbody.innerHTML = registeredUsers.map(u => {
-            const sources = (u.allowedSources || 'None').split(',').map(s => 
-                `<span class="px-2 py-1 bg-blue-100 text-blue-700 rounded text-[10px] font-bold mr-1 uppercase">${s.trim()}</span>`
-            ).join('');
+            const sources = (u.allowedSources || 'Solar, Wind, Hydro').split(',').map(s => {
+                const name = s.trim().toUpperCase();
+                let color = 'bg-blue-100 text-blue-700';
+                if (name.includes('SOLAR')) color = 'bg-orange-100 text-orange-700';
+                if (name.includes('WIND')) color = 'bg-emerald-100 text-emerald-700';
+                if (name.includes('HYDRO')) color = 'bg-cyan-100 text-cyan-700';
+                return `<span class="px-2 py-1 ${color} rounded text-[10px] font-bold mr-1 uppercase shadow-sm">${name}</span>`;
+            }).join('');
 
             return `
-            <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
-                <td class="p-4 text-gray-500 font-bold">#${u.id}</td>
+            <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors border-b border-gray-100 dark:border-gray-800">
+                <td class="p-4 text-gray-400 font-mono text-xs">#${u.id}</td>
                 <td class="p-4">
                     <div class="font-bold text-gray-800 dark:text-white">${u.fullName || u.username}</div>
-                    <div class="text-[10px] text-gray-400">@${u.username}</div>
+                    <div class="text-[10px] text-gray-400 font-medium">@${u.username}</div>
                 </td>
                 <td class="p-4">
-                    <div class="text-sm font-medium">${u.email}</div>
-                    <div class="text-xs text-gray-500">${u.phone || 'No Phone'}</div>
+                    <div class="text-sm font-semibold text-gray-700 dark:text-gray-300">${u.email}</div>
+                    <div class="text-[11px] text-gray-500">${u.phone || 'No Contact'}</div>
                 </td>
-                <td class="p-4 text-gray-500 text-xs italic">${u.address || 'No Address'}</td>
+                <td class="p-4 text-gray-500 text-xs italic truncate max-w-[150px]">${u.address || 'Not Provided'}</td>
                 <td class="p-4">${sources}</td>
                 <td class="p-4">
-                    <button class="bg-red-50 hover:bg-red-500 hover:text-white text-red-600 border border-red-200 px-3 py-1.5 rounded-lg text-xs font-bold transition-all" onclick="sendAlert(${u.id}, '${u.username}')">
-                        ⚠ Alert
+                    <button class="bg-white dark:bg-gray-800 hover:bg-blue-600 hover:text-white text-blue-600 border border-blue-200 dark:border-blue-900/50 px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-sm hover:shadow-md flex items-center gap-2" onclick="viewDetails(${u.id})">
+                        🔍 View Full Details
                     </button>
                 </td>
             </tr>`;
@@ -143,28 +184,72 @@ async function loadUsers() {
     } catch(e) { console.error('Error loading users:', e); }
 }
 
-async function sendAlert(userId, username) {
-    const message = prompt(`Enter alert message for ${username}:`, 'Please check your energy usage');
-    if (!message) return;
-    const source = prompt('Enter source (Solar/Wind/Hydro):', 'Solar');
-    if (!source) return;
-    try {
-        const res = await fetch(`${API}/admin/send-alert`, { credentials: 'include',
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-            body: JSON.stringify({ userId, message, source })
+function viewDetails(userId) {
+    // We'll fetch or find the user object to show in the modal
+    fetch(`${API}/admin/users`, { credentials: 'include' })
+        .then(res => res.json())
+        .then(users => {
+            const u = users.find(user => user.id === userId);
+            if (!u) return;
+
+            document.getElementById('modalTitle').innerText = `Profile: ${u.fullName || u.username}`;
+            document.getElementById('modalContent').innerHTML = `
+                <div class="space-y-6">
+                    <div class="flex items-center gap-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-2xl border border-blue-100 dark:border-blue-900/50">
+                        <div class="w-16 h-16 bg-blue-900 text-white rounded-full flex items-center justify-center text-2xl font-bold">
+                            ${(u.fullName || u.username).charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-gray-900 dark:text-white">${u.fullName || 'Registered User'}</h3>
+                            <p class="text-blue-600 dark:text-blue-400 font-medium text-sm">@${u.username} • User ID: #${u.id}</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4 text-sm">
+                        <div class="p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-100 dark:border-gray-800">
+                            <p class="text-gray-400 text-[10px] uppercase tracking-widest font-bold mb-1">Email Address</p>
+                            <p class="font-semibold text-gray-700 dark:text-gray-200">${u.email}</p>
+                        </div>
+                        <div class="p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-100 dark:border-gray-800">
+                            <p class="text-gray-400 text-[10px] uppercase tracking-widest font-bold mb-1">Phone Number</p>
+                            <p class="font-semibold text-gray-700 dark:text-gray-200">${u.phone || 'N/A'}</p>
+                        </div>
+                        <div class="p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-100 dark:border-gray-800 col-span-2">
+                            <p class="text-gray-400 text-[10px] uppercase tracking-widest font-bold mb-1">Registration Address</p>
+                            <p class="font-semibold text-gray-700 dark:text-gray-200">${u.address || 'No address provided in profile.'}</p>
+                        </div>
+                    </div>
+
+                    <div class="p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-100 dark:border-gray-800">
+                        <p class="text-gray-400 text-[10px] uppercase tracking-widest font-bold mb-2">Energy Access Rights</p>
+                        <div class="flex gap-2">
+                            ${(u.allowedSources || 'Solar, Wind, Hydro').split(',').map(s => `<span class="px-3 py-1 bg-blue-900 text-white rounded-lg text-[10px] font-bold uppercase">${s.trim()}</span>`).join('')}
+                        </div>
+                    </div>
+
+                    <div class="flex gap-3 pt-4">
+                        <button onclick="closeModal()" class="flex-1 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 py-3 rounded-xl font-bold transition-all">Close</button>
+                        <button onclick="alert('Sending direct message to ${u.username}...') " class="flex-1 bg-blue-900 text-white py-3 rounded-xl font-bold shadow-lg shadow-blue-900/20 transition-all hover:scale-[1.02]">Contact User</button>
+                    </div>
+                </div>
+            `;
+            document.getElementById('detailModal').classList.remove('hidden');
+            document.getElementById('detailModal').classList.add('flex');
         });
-        const data = await res.json();
-        alert(data.message || 'Alert sent');
-    } catch(e) { alert('Error sending alert'); }
 }
 
+function closeModal() {
+    document.getElementById('detailModal').classList.add('hidden');
+    document.getElementById('detailModal').classList.remove('flex');
+}
+
+let sentCount = 0;
 async function sendNotif() {
     const userId = document.getElementById('notifUserId').value;
     const message = document.getElementById('notifMessage').value;
     const source = document.getElementById('notifSource').value;
     if (!userId || !message) { alert('Please fill all fields'); return; }
+    
     try {
         const res = await fetch(`${API}/admin/notify`, { credentials: 'include',
             method: 'POST',
@@ -173,7 +258,33 @@ async function sendNotif() {
             body: JSON.stringify({ userId, message, source })
         });
         const data = await res.json();
-        alert(data.message || 'Sent!');
+        
+        // Add to history table
+        const tbody = document.getElementById('sentNotifRows');
+        if (sentCount === 0) tbody.innerHTML = ''; // Clear empty state
+        
+        const newRow = `
+            <tr class="border-b border-gray-50 dark:border-gray-800/50 hover:bg-gray-50/50 dark:hover:bg-gray-800/20 transition-all">
+                <td class="p-4 font-bold text-blue-600">#${userId}</td>
+                <td class="p-4">
+                    <span class="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded text-[10px] font-bold uppercase">${source}</span>
+                </td>
+                <td class="p-4 text-gray-600 dark:text-gray-400">${message}</td>
+                <td class="p-4 text-right">
+                    <span class="px-2 py-1 bg-emerald-100 text-emerald-700 rounded text-[10px] font-bold">✅ SENT</span>
+                </td>
+            </tr>
+        `;
+        tbody.insertAdjacentHTML('afterbegin', newRow);
+        
+        sentCount++;
+        document.getElementById('notifCount').innerText = `${sentCount} Sent`;
+        
+        // Clear inputs
+        document.getElementById('notifUserId').value = '';
+        document.getElementById('notifMessage').value = '';
+        
+        alert(data.message || 'Notification Sent Successfully!');
     } catch(e) { alert('Error sending notification'); }
 }
 
